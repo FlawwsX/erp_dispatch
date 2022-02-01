@@ -33,7 +33,7 @@ AddEventHandler("dispatch:addUnit", function(callid, player, cb)
                 end
             end
         end
-		local callsign = exports['testmdt']:GetCallsign(player.identifier)
+	local callsign = exports['mdt']:GetCallsign(player.identifier)
         if player.job.name == 'police' then
             table.insert(calls[callid]['units'], { cid = player.identifier, fullname = player.name, job = 'Police', callsign = callsign[1].callsign	})
         elseif player.job.name == 'ambulance' then
