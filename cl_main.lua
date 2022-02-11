@@ -1,6 +1,13 @@
 local callID = 0
 
 -- Hunting
+QBCore = exports["qb-core"]:GetCoreObject()
+local currentCallSign = ""
+local playerPed, playerCoords = PlayerPedId(), vec3(0, 0, 0)
+local currentVehicle, inVehicle, currentlyArmed, currentWeapon = nil, false, false, `WEAPON_UNARMED`
+
+PlayerData = {}
+PlayerJob = {}
 
 local inHuntingZone = false
 
@@ -23,34 +30,47 @@ huntingZone:onPlayerInOut(function(isPointInside, point)
     inHuntingZone = isPointInside
 end)
 
-CreateThread(function() -- Use this only if you think/plan on restarting the resource often.
-    while PlayerData['cid'] == nil do
-      PlayerData = exports['echorp']:GetPlayerData()
-      Wait(5000)
+-- for testing when restarting script
+CreateThread(function()
+    while QBCore == nil do
+        Wait(200)
     end
-    return
+    PlayerData = QBCore.Functions.GetPlayerData()
+    PlayerJob  = QBCore.Functions.GetPlayerData().job
 end)
 
-local currentCallSign = ""
-local playerPed, playerCoords = PlayerPedId(), vec3(0, 0, 0)
-local currentVehicle, inVehicle, currentlyArmed, currentWeapon = nil, false, false, `WEAPON_UNARMED`
-
-PlayerData = {}
-
-RegisterNetEvent('echorp:playerSpawned') -- Use this to grab player info on spawn.
-AddEventHandler('echorp:playerSpawned', function(sentData) PlayerData = sentData end)
-
-RegisterNetEvent('echorp:updateinfo')
-AddEventHandler('echorp:updateinfo', function(toChange, targetData) 
-    PlayerData[toChange] = targetData
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+    isLoggedIn = true
+    PlayerData= QBCore.Functions.GetPlayerData()
 end)
 
-RegisterNetEvent('echorp:doLogout') -- Use this to logout.
-AddEventHandler('echorp:doLogout', function(sentData) 
-    PlayerData = {}
+RegisterNetEvent('QBCore:Client:OnPlayerUnload')
+AddEventHandler('QBCore:Client:OnPlayerUnload', function()
+	PlayerData = {}
     currentCallSign = ""
     currentVehicle, inVehicle, currentlyArmed, currentWeapon = nil, false, false, `WEAPON_UNARMED`
 end)
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate')
+AddEventHandler('QBCore:Client:OnJobUpdate', function(JobInfo)
+    PlayerJob = JobInfo
+end)
+
+local function IsPoliceJob(job)
+    for k, v in pairs(Config.PoliceJob) do
+        if job == v then
+            return true
+        end
+    end
+    return false
+end
+
+local function GetPedGender()
+    local gender = "Male"
+    if QBCore.Functions.GetPlayerData().charinfo.gender == 1 then gender = "Female" end
+    return gender
+end
 
 local colors = {
     --[0] = "Metallic Black",
@@ -560,7 +580,7 @@ CreateThread(function() -- Gun Shots
                     if not inVehicle and not shouldAlert then
                         if math.random(10) > 5 then
                             cooldownSMD = GetGameTimer() + math.random(45000,60000) -- 20 => 25 Seconds.
-                        elseif not PlayerData.job.isPolice then
+                        elseif not IsPoliceJob(PlayerJob.name) then
                             local closestNPC = GetClosestNPC(playerCoords, 25.0, 'armed')
                             if closestNPC and DoesEntityExist(closestNPC) then
                                 cooldownSMD = GetGameTimer() + math.random(60000,90000) -- 20 => 25 Seconds.
@@ -580,7 +600,7 @@ end)
 
 function ArmedPlayer() -- When aiming weapon.
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
 
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
@@ -608,7 +628,7 @@ function ArmedPlayer() -- When aiming weapon.
         z = currentPos.z
         },
         dispatchMessage = "Brandishing",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
 end
@@ -616,7 +636,7 @@ end
 RegisterNetEvent('erp-dispatch:gunshotAlert')
 AddEventHandler('erp-dispatch:gunshotAlert', function(sentCoords, isAuto, isCop)
     if sentCoords then
-        if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then
+        if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then
             local blipAlpha = 200
             local gunshotBlip = AddBlipForRadius(sentCoords, 75.0)
             SetBlipHighDetail(gunshotBlip, true)
@@ -682,7 +702,7 @@ end)
 RegisterNetEvent('erp-dispatch:combatAlert')
 AddEventHandler('erp-dispatch:combatAlert', function(sentCoords)
     if sentCoords then
-        if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then
+        if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then
             local alpha = 250
             local combatBlip = AddBlipForCoord(sentCoords)
 
@@ -718,7 +738,7 @@ RegisterNetEvent('erp-dispatch:armedperson')
 AddEventHandler('erp-dispatch:armedperson', function(sentCoords)
     if sentCoords then
         
-        if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then 
+        if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then 
             local alpha = 250
             local armedperson = AddBlipForCoord(sentCoords)
 
@@ -760,17 +780,18 @@ AddEventHandler('erp-dispatch:manageNotifs', function(sentSetting)
     if wantedSetting == "on" then
         disableNotis = false
         disableNotifSounds = false
-        exports['erp_notifications']:SendAlert('inform', 'Dispatch enabled.')
+        QBCore.Functions.Notify("Dispatch enabled", "success")
     elseif wantedSetting == "off" then
         disableNotis = true
         disableNotifSounds = true
-        exports['erp_notifications']:SendAlert('inform', 'Dispatch disabled.')
+        QBCore.Functions.Notify("Dispatch disabled", "success")
     elseif wantedSetting == "mute" then
         disableNotis = false
         disableNotifSounds = true
-        exports['erp_notifications']:SendAlert('inform', 'Dispatch muted.')
+        QBCore.Functions.Notify("Dispatch muted", "success")
     else
-        exports['erp_notifications']:SendAlert('inform', 'Please choose to have dispatch as "on", "off" or "mute".', 5000)
+        QBCore.Functions.Notify('Please choose to have dispatch as "on", "off" or "mute".', "success")
+
     end
 end)
 
@@ -807,9 +828,10 @@ end)
 
 RegisterNetEvent('civilian:alertPolice')
 AddEventHandler("civilian:alertPolice",function(basedistance,alertType,objPassed,isGunshot,isHunting,sentWeapon)
-    if PlayerData.job == nil then return end;
-    local isPolice = PlayerData.job.isPolice
+    if PlayerData.job == nil then return end
 
+    local isPolice = IsPoliceJob(PlayerJob.name)
+print(isPolice)
     local object = objPassed
 
     if not daytime then
@@ -906,7 +928,7 @@ AddEventHandler("civilian:alertPolice",function(basedistance,alertType,objPassed
                 AlertCheckLockpick(object)
             end
         end
-    elseif alertType == "robberyhouse" and not PlayerData.job.isPolice then
+    elseif alertType == "robberyhouse" then
         AlertCheckRobbery2()
     end
 end)
@@ -1018,7 +1040,7 @@ end)
 function AlertFight()
 
     local locationInfo = GetStreetAndZone()
-    local gender, armed = IsPedMale(playerPed), IsPedArmed(playerPed, 7)
+    local gender, armed = GetPedGender(playerPed), IsPedArmed(playerPed, 7)
     local currentPos = GetEntityCoords(playerPed)
 
     local dispatchCode = "10-15"
@@ -1039,10 +1061,10 @@ function AlertFight()
         y = currentPos.y,
         z = currentPos.z
         },
-        dispatchMessage = "Disturbance",
+        dispatchMessage = "Fight In Progress",
         blipSprite = 458,
         blipColor = 25,
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     TriggerServerEvent('erp-dispatch:combatAlert', currentPos)
@@ -1071,7 +1093,7 @@ function AlertFight()
                     z = newPos.z
                     },
                     dispatchMessage = "Car fleeing 10-15",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:combatAlert', newPos)
             end
@@ -1083,7 +1105,7 @@ end
 function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change priority to 1
     if KnownWeapons[sentWeapon] and not IsPedCurrentWeaponSilenced(PlayerPedId()) then
         local locationInfo = GetStreetAndZone()
-        local gender = IsPedMale(playerPed)
+        local gender = GetPedGender(playerPed)
         local currentPos = GetEntityCoords(playerPed)
 
         local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
@@ -1092,9 +1114,9 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
         local initialTenCode = "10-60"
         local isAuto = KnownWeapons[sentWeapon]['isAuto']
 
-        TriggerServerEvent('erp-dispatch:gunshotAlert', currentPos, isAuto, PlayerData.job.isPolice)
+        TriggerServerEvent('erp-dispatch:gunshotAlert', currentPos, isAuto, IsPoliceJob(PlayerJob.name))
 
-        local job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        local job = Config.PoliceJob
         --if isHunting then job = {"sapr"} end
 
         TriggerServerEvent('dispatch:svNotify', {
@@ -1141,9 +1163,9 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
                         z = newPos.z
                         },
                         dispatchMessage = "Car fleeing 10-60",
-                        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                        job = Config.PoliceJob
                     })
-                    TriggerServerEvent('erp-dispatch:gunshotAlert', newPos, false, PlayerData.job.isPolice)
+                    TriggerServerEvent('erp-dispatch:gunshotAlert', newPos, false, IsPoliceJob(PlayerJob.name))
                 end
                 return
             end)
@@ -1159,67 +1181,55 @@ end)
 RegisterCommand('911', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
     if string.len(msg) > 0 then
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = QBCore.Functions.GetPlayerData()
         local locationInfo = GetStreetAndZone()
-        local gender = IsPedMale(playerPed)
+        local gender = GetPedGender(playerPed)
         local currentPos = GetEntityCoords(playerPed)
-
-        TriggerEvent('dp:playEmote', "phone")
-		local rfl = exports['erp_progressbar']:taskBar(math.random(2500, 4000), "Dialing 911")
-        TriggerEvent('dp:cancelEmote')
-        if rfl == 100 then
-            TriggerServerEvent('dispatch:svNotify', {
-                dispatchCode = "911",
-                firstStreet = locationInfo,
-                gender = gender,
-                priority = 1,
-                origin = { x = currentPos.x, y = currentPos.y, z = currentPos.z },
-                dispatchMessage = "911 Call",
-                name = plyData['firstname']..' '..plyData['lastname'],
-                number =  plyData['phone_number'],
-                job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"},
-                information = msg
-            })
-        end
+        TriggerServerEvent('dispatch:svNotify', {
+            dispatchCode = "911",
+            firstStreet = locationInfo,
+            gender = gender,
+            priority = 1,
+            origin = { x = currentPos.x, y = currentPos.y, z = currentPos.z },
+            dispatchMessage = "911 Call",
+            name = plyData.charinfo.firstname.. ",".. plyData.charinfo.lastname,
+            number = plyData.charinfo.phone,
+            job = Config.PoliceJob,
+            information = msg
+        })
     else
-        exports['erp_notifications']:SendAlert('inform', 'Please put a reason after the 911')
+        QBCore.Functions.Notify('Please put a reason after the 911', "success")
     end
 end)
 
 RegisterCommand('311', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
     if string.len(msg) > 0 then
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = QBCore.Functions.GetPlayerData()
         local locationInfo = GetStreetAndZone()
-        local gender = IsPedMale(playerPed)
+        local gender = GetPedGender(playerPed)
         local currentPos = GetEntityCoords(playerPed)
-
-        TriggerEvent('dp:playEmote', "phone")
-		local rfl = exports['erp_progressbar']:taskBar(math.random(2500, 4000), "Dialing 311")
-        TriggerEvent('dp:cancelEmote')
-        if rfl == 100 then
-            TriggerServerEvent('dispatch:svNotify', {
-                dispatchCode = "311",
-                firstStreet = locationInfo,
-                gender = gender,
-                priority = 2,
-                origin = { x = currentPos.x, y = currentPos.y, z = currentPos.z },
-                dispatchMessage = "311 Call",
-                name = plyData['firstname']..' '..plyData['lastname'],
-                number =  plyData['phone_number'],
-                job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"},
-                information = msg
-            })
-        end
+        TriggerServerEvent('dispatch:svNotify', {
+            dispatchCode = "311",
+            firstStreet = locationInfo,
+            gender = gender,
+            priority = 2,
+            origin = { x = currentPos.x, y = currentPos.y, z = currentPos.z },
+            dispatchMessage = "311 Call",
+            name = plyData.charinfo.firstname.. ",".. plyData.charinfo.lastname,
+            number = plyData.charinfo.phone,
+            job = Config.PoliceJob,
+            information = msg
+        })
     else
-        exports['erp_notifications']:SendAlert('inform', 'Please put a reason after the 311')
+        QBCore.Functions.Notify('Please put a reason after the 311', "success")
     end
 end)
 
 
 function DrugSale()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
 
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
@@ -1238,7 +1248,7 @@ function DrugSale()
             z = currentPos.z
         },
         dispatchMessage = "Suspicious Hand-off",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 5 and not isInVehicle then
@@ -1265,7 +1275,7 @@ function DrugSale()
                     z = newPos.z
                     },
                     dispatchMessage = "Car Fleeing 10-99",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:drugsale', newPos)
             end
@@ -1276,7 +1286,7 @@ end
 
 function CarCrash()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1301,14 +1311,14 @@ function CarCrash()
             z = currentPos.z
         },
         dispatchMessage = "Vehicle Crash",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+        job = Config.PoliceJob
     })
 end
 
 function AlertCheckLockpick(object)
 
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
 
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
@@ -1335,14 +1345,14 @@ function AlertCheckLockpick(object)
             z = currentPos.z
         },
         dispatchMessage = "Vehicle Theft",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 end
 
 
 function AlertpersonRobbed()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1361,7 +1371,7 @@ function AlertpersonRobbed()
             z = currentPos.z
         },
         dispatchMessage = "Store Robbery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 3 and not isInVehicle then
@@ -1389,7 +1399,7 @@ function AlertpersonRobbed()
                     z = newPos.z
                     },
                     dispatchMessage = "Vehicle fleeing 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:houserobbery', newPos)
             end
@@ -1405,7 +1415,7 @@ end)
 
 function AlertCheckRobbery2()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1425,7 +1435,7 @@ function AlertCheckRobbery2()
             z = currentPos.z
         },
         dispatchMessage = "Breaking and entering",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 3 and not isInVehicle then
@@ -1453,7 +1463,7 @@ function AlertCheckRobbery2()
                     z = newPos.z
                     },
                     dispatchMessage = "Car fleeing 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:houserobbery', newPos)
             end
@@ -1464,7 +1474,7 @@ end
 
 function AlertBankTruck()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1484,7 +1494,7 @@ function AlertBankTruck()
             z = currentPos.z
         },
         dispatchMessage = "Bank Truck",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1512,7 +1522,7 @@ function AlertBankTruck()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading Bank Truck",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:banktruck', newPos)
             end
@@ -1523,7 +1533,7 @@ end
 
 function AlertArt()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1543,7 +1553,7 @@ function AlertArt()
             z = currentPos.z
         },
         dispatchMessage = "Art Gallery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1571,7 +1581,7 @@ function AlertArt()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading Bank Truck",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:art', newPos)
             end
@@ -1582,7 +1592,7 @@ end
 
 function AlertG6()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1602,13 +1612,13 @@ function AlertG6()
             z = currentPos.z
         },
         dispatchMessage = "Gruppe Sechs Alarm",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 end
 
 function AlertJewelRob()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1628,7 +1638,7 @@ function AlertJewelRob()
             z = currentPos.z
         },
         dispatchMessage = "Vangelico Robbery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1656,7 +1666,7 @@ function AlertJewelRob()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:jewel', newPos)
             end
@@ -1667,7 +1677,7 @@ end
 
 function AlertJailBreak()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local dispatchCode = "10-98"
@@ -1686,7 +1696,7 @@ function AlertJailBreak()
             z = currentPos.z
         },
         dispatchMessage = "Jail Break in Progress",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1715,7 +1725,7 @@ function AlertJailBreak()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-98",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
 
                 TriggerServerEvent('erp-dispatch:blip:jailbreak', newPos)
@@ -1727,7 +1737,7 @@ end
 
 function AlertPaletoRobbery()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local dispatchCode = "10-90"
@@ -1746,7 +1756,7 @@ function AlertPaletoRobbery()
             z = currentPos.z
         },
         dispatchMessage = "Paleto Robbery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1774,7 +1784,7 @@ function AlertPaletoRobbery()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:bankwobbewy', newPos)
             end
@@ -1785,7 +1795,7 @@ end
 
 function AlertCarBoost(boosted)
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local veh = NetworkGetEntityFromNetworkId(boosted)
@@ -1811,7 +1821,7 @@ function AlertCarBoost(boosted)
             z = currentPos.z
         },
         dispatchMessage = "Car Boosting",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     Citizen.CreateThread(function()
@@ -1828,7 +1838,7 @@ end
 
 function AlertFleecaRobbery()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1848,7 +1858,7 @@ function AlertFleecaRobbery()
             z = currentPos.z
         },
         dispatchMessage = "Fleeca Robbery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1876,7 +1886,7 @@ function AlertFleecaRobbery()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:bankwobbewy', newPos)
             end
@@ -1912,7 +1922,7 @@ end)
 
 function AlertPacificRobbery()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1931,7 +1941,7 @@ function AlertPacificRobbery()
             z = currentPos.z
         },
         dispatchMessage = "Pacific Standard Heist",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1958,7 +1968,7 @@ function AlertPacificRobbery()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:bankwobbewy', newPos)
             end
@@ -1969,7 +1979,7 @@ end
 
 function AlertPowerplant()
     local locationInfo = GetStreetAndZone()
-    local gender = IsPedMale(playerPed)
+    local gender = GetPedGender(playerPed)
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -1988,7 +1998,7 @@ function AlertPowerplant()
             z = currentPos.z
         },
         dispatchMessage = "Powerplant Hit",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = Config.PoliceJob
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -2015,7 +2025,7 @@ function AlertPowerplant()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = Config.PoliceJob
                 })
                 TriggerServerEvent('erp-dispatch:bankwobbewy', newPos)
             end
@@ -2061,10 +2071,10 @@ RegisterNetEvent('police:tenThirteenA')
 AddEventHandler('police:tenThirteenA', function()
     if tenThirteenAC then return end;
     
-    if PlayerData.job.isPolice then	
+    if IsPoliceJob(PlayerJob.name) then	
        
         local pos = GetEntityCoords(PlayerPedId(),  true)
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = QBCore.Functions.GetPlayerData()
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-13A",
@@ -2095,7 +2105,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:policealertA')
 AddEventHandler('erp-dispatch:policealertA', function(targetCoords)
-    if (PlayerData.job.name == 'ambulance' or PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
 		local alpha = 250
 		local policedown = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2127,10 +2137,10 @@ RegisterNetEvent('police:tenThirteenB')
 AddEventHandler('police:tenThirteenB', function()
     if tenThirteenBC then return end;
     
-    if PlayerData.job.isPolice then
+    if IsPoliceJob(PlayerJob.name) then
         local pos = GetEntityCoords(PlayerPedId(),  true)
         
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = QBCore.Functions.GetPlayerData()
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-13B",
@@ -2160,7 +2170,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:policealertB')
 AddEventHandler('erp-dispatch:policealertB', function(targetCoords)
-    if (PlayerData.job.name == 'ambulance' or PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
 		local alpha = 250
 		local policedown2 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2191,7 +2201,7 @@ end)
 RegisterNetEvent('erp-dispatch:vehiclecrash')
 AddEventHandler('erp-dispatch:vehiclecrash', function(targetCoords)
     
-    if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if (IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
 		local alpha = 250
 		local injured = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2222,7 +2232,7 @@ end)
 RegisterNetEvent('erp-dispatch:vehicletheft')
 AddEventHandler('erp-dispatch:vehicletheft', function(targetCoords)
     
-    if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if (IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
 		local alpha = 250
 		local thiefBlip = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2253,7 +2263,7 @@ end)
 RegisterNetEvent('erp-dispatch:storerobbery')
 AddEventHandler('erp-dispatch:storerobbery', function(targetCoords)
     
-    if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local store = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2272,12 +2282,11 @@ AddEventHandler('erp-dispatch:storerobbery', function(targetCoords)
 			alpha = alpha - 1
 			SetBlipAlpha(store, alpha)
 
-		if alpha == 0 then
-			RemoveBlip(store)
-		return
-      end
+            if alpha == 0 then
+                RemoveBlip(store)
+            end
+        end
     end
-  end
 end)
 
 ---- House Robbery ----
@@ -2285,7 +2294,7 @@ end)
 RegisterNetEvent('erp-dispatch:houserobbery')
 AddEventHandler('erp-dispatch:houserobbery', function(targetCoords)
     
-    if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local burglary = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2317,7 +2326,7 @@ end)
 RegisterNetEvent('erp-dispatch:banktruck')
 AddEventHandler('erp-dispatch:banktruck', function(targetCoords)
     
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2346,7 +2355,7 @@ end)
 RegisterNetEvent('erp-dispatch:art')
 AddEventHandler('erp-dispatch:art', function(targetCoords)
     
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local gallery = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2375,7 +2384,7 @@ end)
 RegisterNetEvent('erp-dispatch:jewel')
 AddEventHandler('erp-dispatch:jewel', function(targetCoords)
     
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2403,7 +2412,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:bankwobbewy')
 AddEventHandler('erp-dispatch:bankwobbewy', function(targetCoords)
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local bankwobbewy = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2431,7 +2440,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:g6')
 AddEventHandler('erp-dispatch:g6', function(targetCoords)
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local g6 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2459,7 +2468,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:carboosting')
 AddEventHandler('erp-dispatch:carboosting', function(targetCoords, vehicle, alert)
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local carboosting = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
         local hacked = false
@@ -2490,7 +2499,7 @@ end)
 RegisterNetEvent('erp-dispatch:yachtheist')
 AddEventHandler('erp-dispatch:yachtheist', function(targetCoords)
     
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2521,7 +2530,7 @@ end)
 RegisterNetEvent('erp-dispatch:drugsale')
 AddEventHandler('erp-dispatch:drugsale', function(sentCoords)
     
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local drugsale = AddBlipForCoord(sentCoords)
 
@@ -2552,7 +2561,7 @@ end)
 RegisterNetEvent('erp-dispatch:blip:jailbreak')
 AddEventHandler('erp-dispatch:blip:jailbreak', function(targetCoords)
     
-	if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
 		local alpha = 250
 		local jail = AddBlipForCoord(1779.65, 2590.39, 50.49)
 
@@ -2646,7 +2655,7 @@ AddEventHandler('dispatch:clNotify', function(sNotificationData, sNotificationId
                 callID = sNotificationId,
                 data = sNotificationData,
                 timer = 5000,
-                isPolice = PlayerData.job.isPolice
+                isPolice = IsPoliceJob(PlayerJob.name)
             })
         end
       end
@@ -2655,7 +2664,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:setBlip')
 AddEventHandler('erp-dispatch:setBlip', function(type, pos, id)
-    if (PlayerData.job.isPolice or PlayerData.job.name == 'ambulance' or PlayerData.job.name == 'cmmc') and PlayerData.job.duty == 1 then	
+    if (IsPoliceJob(PlayerJob.name) or PlayerData.job.name == 'ambulance') and PlayerData.job.onduty then	
         PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
         PlaySoundFrontend(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", 0)
             
@@ -2727,7 +2736,7 @@ AddEventHandler('ems:tenThirteenA', function()
     if PlayerData.job.name == 'ambulance' then	
        
         local pos = GetEntityCoords(PlayerPedId(),  true)
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = QBCore.Functions.GetPlayerData()
 
 
         local job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
@@ -2761,7 +2770,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:emsalertA')
 AddEventHandler('erp-dispatch:emsalertA', function(targetCoords)
-    if (PlayerData.job.name == 'ambulance' or PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
 		local alpha = 250
 		local policedown = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2794,7 +2803,7 @@ AddEventHandler('ems:tenThirteenB', function()
     if PlayerData.job.name == 'ambulance' then	
         local pos = GetEntityCoords(PlayerPedId(),  true)
         
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = QBCore.Functions.GetPlayerData()
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-14B",
@@ -2824,7 +2833,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:emsalertB')
 AddEventHandler('erp-dispatch:emsalertB', function(targetCoords) 
-    if (PlayerData.job.name == 'ambulance' or PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
 		local alpha = 250
 		local policedown2 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2851,7 +2860,7 @@ AddEventHandler('erp-dispatch:emsalertB', function(targetCoords)
 end)
 
 RegisterNetEvent('erp-dispatch:mz:lockdown', function(targetCoords) 
-    if (PlayerData.job.name == 'ambulance' or PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
+    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
 		local alpha = 250
 		local policedown2 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2878,7 +2887,7 @@ RegisterNetEvent('erp-dispatch:mz:lockdown', function(targetCoords)
 end)
 
 RegisterNetEvent('erp-dispatch:mz:lockdownoff', function(targetCoords) 
-    if (PlayerData.job.name == 'ambulance' or PlayerData.job.isPolice) and PlayerData.job.duty == 1 then	
-        exports['erp_notifications']:SendAlert('success', 'Mount Zonah is no longer on lockdown', 10000)
+    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+        QBCore.Functions.Notify("Mount Zonah is no longer on lockdown", "success")
     end
 end)
