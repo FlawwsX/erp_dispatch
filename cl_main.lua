@@ -1118,7 +1118,6 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
 
         local job = Config.PoliceJob
         --if isHunting then job = {"sapr"} end
-
         TriggerServerEvent('dispatch:svNotify', {
             dispatchCode = initialTenCode,
             firstStreet = locationInfo,
@@ -1135,7 +1134,7 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
             y = currentPos.y,
             z = currentPos.z
             },
-            dispatchMessage = "Shots Fired",
+            dispatchMessage = vehicleData.model ~= nil and "Shots Fired from Vehicle" or "Shots Fired",
             job = job
         })
 
