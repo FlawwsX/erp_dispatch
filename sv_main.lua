@@ -1,5 +1,14 @@
 local calls = {}
 
+local function IsPoliceJob(job)
+    for k, v in pairs(Config.PoliceJob) do
+        if job == v then
+            return true
+        end
+    end
+    return false
+end
+
 function GetDispatchCalls() return calls end
 exports('GetDispatchCalls', GetDispatchCalls) -- exports['erp_dispatch']:GetDispatchCalls()
 
@@ -18,6 +27,7 @@ AddEventHandler("dispatch:svNotify", function(data)
     end
 end)
 
+-- this is mdt call
 AddEventHandler("dispatch:addUnit", function(callid, player, cb)
     if calls[callid] then
 
@@ -42,6 +52,7 @@ AddEventHandler("dispatch:addUnit", function(callid, player, cb)
     end
 end)
 
+-- this is mdt call
 AddEventHandler("dispatch:removeUnit", function(callid, player, cb)
     if calls[callid] then
         if #calls[callid]['units'] > 0 then
@@ -74,8 +85,9 @@ end)
 
 RegisterCommand('togglealerts', function(source, args, user)
 	local source = source
-	local job = exports['echorp']:GetOnePlayerInfo(source, 'job')
-	if job.isPolice or job.name == 'ambulance' or job.name == 'pa' or job.name == 'cmmc' then
+    local Player = QBCore.Functions.GetPlayer(source)
+	local job = Player.PlayerData.job
+	if IsPoliceJob(job.name) or job.name == 'ambulance' then
 		TriggerClientEvent('erp-dispatch:manageNotifs', source, args[1])
 	end
 end)
@@ -182,12 +194,12 @@ AddEventHandler('erp-dispatch:policealertB', function(sentCoords)
     TriggerClientEvent('erp-dispatch:policealertB', -1, sentCoords)
 end)
 
-CreateThread(function()
-    while true do
-        Wait(3600000) -- 1 hour
-        calls = {}
-    end
-end)
+-- CreateThread(function()
+--     while true do
+--         Wait(3600000) -- 1 hour
+--         calls = {}
+--     end
+-- end)
 
 RegisterNetEvent('erp-dispatch:emsalertA')
 AddEventHandler('erp-dispatch:emsalertA', function(sentCoords)

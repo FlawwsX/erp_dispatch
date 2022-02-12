@@ -7,6 +7,10 @@ version '1.0.0'
 
 lua54 'yes'
 
+shared_script{
+    "config.lua"
+}
+
 client_script '@PolyZone/client.lua'
 server_script 'sv_main.lua'
 client_script 'cl_main.lua'
