@@ -30,7 +30,6 @@ end)
 -- this is mdt call
 AddEventHandler("dispatch:addUnit", function(callid, player, cb)
     if calls[callid] then
-
         if #calls[callid]['units'] > 0 then
             for i=1, #calls[callid]['units'] do
                 if calls[callid]['units'][i]['cid'] == player.cid then
@@ -40,14 +39,11 @@ AddEventHandler("dispatch:addUnit", function(callid, player, cb)
             end
         end
 
-        if player.job.isPolice then
-            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'Police', callsign = exports['erp_mdt']:GetCallsign(player.cid) })
+        if IsPoliceJob(player.job.name) == "police" then
+            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'Police', callsign = player.callsign })
         elseif player.job.name == 'ambulance' then
-            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'EMS', callsign = exports['erp_mdt']:GetCallsign(player.cid) })
-        elseif player.job.name == 'cmmc' then
-            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'EMS', callsign = exports['erp_mdt']:GetCallsign(player.cid) })
+            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'EMS', callsign = player.callsign })
         end
-
         cb(#calls[callid]['units'])
     end
 end)
