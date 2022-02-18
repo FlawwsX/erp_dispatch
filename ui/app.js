@@ -71,14 +71,22 @@ function timeAgo(dateParam) {
 
 function addNewCall(callID, timer, info, isPolice) {
     const prio = info['priority']
-   
-    let DispatchItem = `<div class="dispatch-item ${callID} dispatch-item-${isPolice} animate__animated"><div class="top-info-holder"><div class="call-id">#${callID}</div><div class="call-code priority-${prio}">${info.dispatchCode}</div><div class="call-name">${info.dispatchMessage}</div></div><div class="bottom-info-holder">`
+    let DispatchItem;
+    if (info['isDead']){
+        DispatchItem = `<div class="dispatch-item ${callID} dispatch-item-${info['isDead']} animate__animated"><div class="top-info-holder"><div class="call-id">#${callID}</div><div class="call-code priority-${prio}">${info.dispatchCode}</div><div class="call-name">${info.dispatchMessage}</div></div><div class="bottom-info-holder">`
+    }
+    else{
+        DispatchItem = `<div class="dispatch-item ${callID} dispatch-item-${isPolice} animate__animated"><div class="top-info-holder"><div class="call-id">#${callID}</div><div class="call-code priority-${prio}">${info.dispatchCode}</div><div class="call-name">${info.dispatchMessage}</div></div><div class="bottom-info-holder">`
+    }
+
 
     // Above we are defining a default dispatch item and then we will append the data we have been sent.
 
     if (info['time']) {
         DispatchItem += `<div class="call-bottom-info"><span class="fas fa-clock"></span>${timeAgo(info['time'])}</div>`
     }
+
+    
 
     if (info['firstStreet']) {
         DispatchItem += `<div class="call-bottom-info"><span class="fas fa-map-pin"></span>${info['firstStreet']}</div>`

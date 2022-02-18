@@ -1135,7 +1135,7 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
             z = currentPos.z
             },
             dispatchMessage = vehicleData.model ~= nil and "Shots Fired from Vehicle" or "Shots Fired",
-            job = job
+            job = {"ambulance","police"}
         })
 
         if math.random(1, 10) > 3 and not isInVehicle then
@@ -1176,6 +1176,11 @@ RegisterNetEvent('drugsalecallpolice')
 AddEventHandler("drugsalecallpolice",function()
     DrugSale()
 end)
+
+RegisterCommand("13A", function ()
+    TriggerEvent("ems:tenThirteenB")
+end)
+
 
 RegisterCommand('911', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
@@ -2071,24 +2076,23 @@ AddEventHandler('police:tenThirteenA', function()
     if tenThirteenAC then return end;
     
     if IsPoliceJob(PlayerJob.name) then	
-       
+       print("?????")
         local pos = GetEntityCoords(PlayerPedId(),  true)
         local plyData = QBCore.Functions.GetPlayerData()
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-13A",
 			firstStreet = GetStreetAndZone(),
-            name = plyData['firstname']..' '..plyData['lastname'],
-            number =  plyData['phone_number'],
+            name = plyData.charinfo.firstname..' '..plyData.charinfo.lastname,
             priority = 1,
-            isDead = true,
+            isDead = "officer",
 			dispatchMessage = "Officer Down",
 			origin = {
 				x = pos.x,
 				y = pos.y,
 				z = pos.z
             },
-            job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+            job = {"police","ambulance"}
         })
         
         TriggerServerEvent('erp-dispatch:policealertA', pos)
@@ -2104,7 +2108,8 @@ end)
 
 RegisterNetEvent('erp-dispatch:policealertA')
 AddEventHandler('erp-dispatch:policealertA', function(targetCoords)
-    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then
+        print("??")	
 		local alpha = 250
 		local policedown = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2140,21 +2145,21 @@ AddEventHandler('police:tenThirteenB', function()
         local pos = GetEntityCoords(PlayerPedId(),  true)
         
         local plyData = QBCore.Functions.GetPlayerData()
-
+        
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-13B",
 			firstStreet = GetStreetAndZone(),
-            name = plyData['firstname']..' '..plyData['lastname'],
+            name = plyData.charinfo.firstname..' '..plyData.charinfo.lastname,
             number =  plyData['phone_number'],
             priority = 1,
-            isDead = true,
+            isDead = "officer",
 			dispatchMessage = "Officer Down",
 			origin = {
 				x = pos.x,
 				y = pos.y,
 				z = pos.z
             },
-            job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+            job = {"police", "ambulance"}
         })
 
         CreateThread(function()
@@ -2738,15 +2743,14 @@ AddEventHandler('ems:tenThirteenA', function()
         local plyData = QBCore.Functions.GetPlayerData()
 
 
-        local job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+        local job = {"police", "ambulance"}
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-14A",
 			firstStreet = GetStreetAndZone(),
-            name = plyData['firstname']..' '..plyData['lastname'],
-            number =  plyData['phone_number'],
+            name = plyData.charinfo.firstname..' '..plyData.charinfo.lastname,
             priority = 1,
-            isDead = true,
+            isDead = "officer",
 			dispatchMessage = "Medic Down",
 			origin = {
 				x = pos.x,
@@ -2807,17 +2811,17 @@ AddEventHandler('ems:tenThirteenB', function()
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-14B",
 			firstStreet = GetStreetAndZone(),
-            name = plyData['firstname']..' '..plyData['lastname'],
+            name = plyData.charinfo.firstname..' '..plyData.charinfo.lastname,
             number =  plyData['phone_number'],
             priority = 1,
-            isDead = true,
+            isDead = "officer",
 			dispatchMessage = "Medic Down",
 			origin = {
 				x = pos.x,
 				y = pos.y,
 				z = pos.z
             },
-            job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+            job = {"police", "ambulance"}
         })
 
         CreateThread(function()

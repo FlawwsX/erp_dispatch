@@ -51,6 +51,10 @@ body {
     background-color: rgba(56, 21, 21, 0.8);
 }
 
+.dispatch-item-officer {
+    background-color: rgb(97, 3, 11);
+}
+
 .top-info-holder {
     width: 95%;
     height: fit-content;
