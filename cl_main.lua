@@ -43,6 +43,7 @@ RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     isLoggedIn = true
     PlayerData= QBCore.Functions.GetPlayerData()
+    PlayerJob  = QBCore.Functions.GetPlayerData().job
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload')
@@ -831,7 +832,6 @@ AddEventHandler("civilian:alertPolice",function(basedistance,alertType,objPassed
     if PlayerData.job == nil then return end
 
     local isPolice = IsPoliceJob(PlayerJob.name)
-print(isPolice)
     local object = objPassed
 
     if not daytime then
