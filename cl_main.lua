@@ -637,7 +637,7 @@ end
 RegisterNetEvent('erp-dispatch:gunshotAlert')
 AddEventHandler('erp-dispatch:gunshotAlert', function(sentCoords, isAuto, isCop)
     if sentCoords then
-        if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then
+        if IsPoliceJob(PlayerJob.name) then
             local blipAlpha = 200
             local gunshotBlip = AddBlipForRadius(sentCoords, 75.0)
             SetBlipHighDetail(gunshotBlip, true)
@@ -703,7 +703,7 @@ end)
 RegisterNetEvent('erp-dispatch:combatAlert')
 AddEventHandler('erp-dispatch:combatAlert', function(sentCoords)
     if sentCoords then
-        if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then
+        if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then
             local alpha = 250
             local combatBlip = AddBlipForCoord(sentCoords)
 
@@ -739,7 +739,7 @@ RegisterNetEvent('erp-dispatch:armedperson')
 AddEventHandler('erp-dispatch:armedperson', function(sentCoords)
     if sentCoords then
         
-        if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then 
+        if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then 
             local alpha = 250
             local armedperson = AddBlipForCoord(sentCoords)
 
@@ -829,7 +829,7 @@ end)
 
 RegisterNetEvent('civilian:alertPolice')
 AddEventHandler("civilian:alertPolice",function(basedistance,alertType,objPassed,isGunshot,isHunting,sentWeapon)
-    if PlayerData.job == nil then return end
+    if PlayerJob == nil then return end
 
     local isPolice = IsPoliceJob(PlayerJob.name)
     local object = objPassed
@@ -1198,7 +1198,7 @@ RegisterCommand('911', function(source, args, rawCommand)
             dispatchMessage = "911 Call",
             name = plyData.charinfo.firstname.. ",".. plyData.charinfo.lastname,
             number = plyData.charinfo.phone,
-            job = Config.PoliceJob,
+            job = Config.PoliceAndAmbulance,
             information = msg
         })
     else
@@ -1222,7 +1222,7 @@ RegisterCommand('311', function(source, args, rawCommand)
             dispatchMessage = "311 Call",
             name = plyData.charinfo.firstname.. ",".. plyData.charinfo.lastname,
             number = plyData.charinfo.phone,
-            job = Config.PoliceJob,
+            job = Config.PoliceAndAmbulance,
             information = msg
         })
     else
@@ -2108,7 +2108,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:policealertA')
 AddEventHandler('erp-dispatch:policealertA', function(targetCoords)
-    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then
+    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then
         print("??")	
 		local alpha = 250
 		local policedown = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
@@ -2174,7 +2174,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:policealertB')
 AddEventHandler('erp-dispatch:policealertB', function(targetCoords)
-    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
 		local alpha = 250
 		local policedown2 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2205,7 +2205,7 @@ end)
 RegisterNetEvent('erp-dispatch:vehiclecrash')
 AddEventHandler('erp-dispatch:vehiclecrash', function(targetCoords)
     
-    if (IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+    if (IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
 		local alpha = 250
 		local injured = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2236,7 +2236,7 @@ end)
 RegisterNetEvent('erp-dispatch:vehicletheft')
 AddEventHandler('erp-dispatch:vehicletheft', function(targetCoords)
     
-    if (IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+    if (IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
 		local alpha = 250
 		local thiefBlip = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2267,7 +2267,7 @@ end)
 RegisterNetEvent('erp-dispatch:storerobbery')
 AddEventHandler('erp-dispatch:storerobbery', function(targetCoords)
     
-    if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local store = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2298,7 +2298,7 @@ end)
 RegisterNetEvent('erp-dispatch:houserobbery')
 AddEventHandler('erp-dispatch:houserobbery', function(targetCoords)
     
-    if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local burglary = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2330,7 +2330,7 @@ end)
 RegisterNetEvent('erp-dispatch:banktruck')
 AddEventHandler('erp-dispatch:banktruck', function(targetCoords)
     
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2359,7 +2359,7 @@ end)
 RegisterNetEvent('erp-dispatch:art')
 AddEventHandler('erp-dispatch:art', function(targetCoords)
     
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local gallery = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2388,7 +2388,7 @@ end)
 RegisterNetEvent('erp-dispatch:jewel')
 AddEventHandler('erp-dispatch:jewel', function(targetCoords)
     
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2416,7 +2416,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:bankwobbewy')
 AddEventHandler('erp-dispatch:bankwobbewy', function(targetCoords)
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local bankwobbewy = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2444,7 +2444,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:g6')
 AddEventHandler('erp-dispatch:g6', function(targetCoords)
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local g6 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2472,7 +2472,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:carboosting')
 AddEventHandler('erp-dispatch:carboosting', function(targetCoords, vehicle, alert)
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local carboosting = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
         local hacked = false
@@ -2503,7 +2503,7 @@ end)
 RegisterNetEvent('erp-dispatch:yachtheist')
 AddEventHandler('erp-dispatch:yachtheist', function(targetCoords)
     
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2534,7 +2534,7 @@ end)
 RegisterNetEvent('erp-dispatch:drugsale')
 AddEventHandler('erp-dispatch:drugsale', function(sentCoords)
     
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local drugsale = AddBlipForCoord(sentCoords)
 
@@ -2565,7 +2565,7 @@ end)
 RegisterNetEvent('erp-dispatch:blip:jailbreak')
 AddEventHandler('erp-dispatch:blip:jailbreak', function(targetCoords)
     
-	if IsPoliceJob(PlayerJob.name) and PlayerData.job.onduty then	
+	if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
 		local alpha = 250
 		local jail = AddBlipForCoord(1779.65, 2590.39, 50.49)
 
@@ -2637,10 +2637,11 @@ AddEventHandler('dispatch:clNotify', function(sNotificationData, sNotificationId
             isPolice = true
         })
     end
-    if PlayerData.job.duty == 0 then return end;
+    -- if not PlayerJob.onduty then return end;
     local shouldAlert = false
     for i=1, #sNotificationData['job'] do
-        if sNotificationData['job'][i] == PlayerData.job.name then
+        print(sNotificationData['job'][i])
+        if sNotificationData['job'][i] == PlayerJob.name then
             shouldAlert = true
             break
         end
@@ -2668,7 +2669,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:setBlip')
 AddEventHandler('erp-dispatch:setBlip', function(type, pos, id)
-    if (IsPoliceJob(PlayerJob.name) or PlayerData.job.name == 'ambulance') and PlayerData.job.onduty then	
+    if (IsPoliceJob(PlayerJob.name) or PlayerJob.name == 'ambulance') and PlayerJob.onduty then	
         PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
         PlaySoundFrontend(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", 0)
             
@@ -2737,7 +2738,7 @@ RegisterNetEvent('ems:tenThirteenA')
 AddEventHandler('ems:tenThirteenA', function()
     if tenThirteenAC then return end;
     
-    if PlayerData.job.name == 'ambulance' then	
+    if PlayerJob.name == 'ambulance' then	
        
         local pos = GetEntityCoords(PlayerPedId(),  true)
         local plyData = QBCore.Functions.GetPlayerData()
@@ -2773,7 +2774,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:emsalertA')
 AddEventHandler('erp-dispatch:emsalertA', function(targetCoords)
-    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
 		local alpha = 250
 		local policedown = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2803,7 +2804,7 @@ RegisterNetEvent('ems:tenThirteenB')
 AddEventHandler('ems:tenThirteenB', function()
     if tenThirteenBC then return end;
     
-    if PlayerData.job.name == 'ambulance' then	
+    if PlayerJob.name == 'ambulance' then	
         local pos = GetEntityCoords(PlayerPedId(),  true)
         
         local plyData = QBCore.Functions.GetPlayerData()
@@ -2836,7 +2837,7 @@ end)
 
 RegisterNetEvent('erp-dispatch:emsalertB')
 AddEventHandler('erp-dispatch:emsalertB', function(targetCoords) 
-    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
 		local alpha = 250
 		local policedown2 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2863,7 +2864,7 @@ AddEventHandler('erp-dispatch:emsalertB', function(targetCoords)
 end)
 
 RegisterNetEvent('erp-dispatch:mz:lockdown', function(targetCoords) 
-    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
 		local alpha = 250
 		local policedown2 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -2890,7 +2891,7 @@ RegisterNetEvent('erp-dispatch:mz:lockdown', function(targetCoords)
 end)
 
 RegisterNetEvent('erp-dispatch:mz:lockdownoff', function(targetCoords) 
-    if (PlayerData.job.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerData.job.onduty then	
+    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
         QBCore.Functions.Notify("Mount Zonah is no longer on lockdown", "success")
     end
 end)
