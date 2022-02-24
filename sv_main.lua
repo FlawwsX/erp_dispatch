@@ -12,8 +12,7 @@ end
 function GetDispatchCalls() return calls end
 exports('GetDispatchCalls', GetDispatchCalls) -- exports['erp_dispatch']:GetDispatchCalls()
 
-RegisterNetEvent("dispatch:svNotify")
-AddEventHandler("dispatch:svNotify", function(data)
+RegisterNetEvent("dispatch:svNotify", function(data)
 	local newId = #calls + 1
 	calls[newId] = data
     calls[newId]['source'] = source
@@ -23,7 +22,7 @@ AddEventHandler("dispatch:svNotify", function(data)
     calls[newId]['time'] = os.time() * 1000
     TriggerClientEvent('dispatch:clNotify', -1, data, newId, source)
     if data['dispatchCode'] == '911' or data['dispatchCode'] == '311' then
-        TriggerClientEvent('erp-dispatch:setBlip', -1, data['dispatchCode'], vector3(data['origin']['x'], data['origin']['y'], data['origin']['z']), newId)
+        TriggerClientEvent('dispatch:setBlip', -1, data['dispatchCode'], vector3(data['origin']['x'], data['origin']['y'], data['origin']['z']), newId)
     end
 end)
 
@@ -84,125 +83,90 @@ RegisterCommand('togglealerts', function(source, args, user)
     local Player = QBCore.Functions.GetPlayer(source)
 	local job = Player.PlayerData.job
 	if IsPoliceJob(job.name) or job.name == 'ambulance' then
-		TriggerClientEvent('erp-dispatch:manageNotifs', source, args[1])
+		TriggerClientEvent('dispatch:manageNotifs', source, args[1])
 	end
 end)
 
-RegisterNetEvent('erp-dispatch:gunshotAlert')
-AddEventHandler('erp-dispatch:gunshotAlert', function(sentCoords, isAuto, isCop)
-    TriggerClientEvent('erp-dispatch:gunshotAlert', -1, sentCoords, isAuto, isCop)
+RegisterNetEvent('dispatch:gunshotAlert', function(sentCoords, isAuto, isCop)
+    TriggerClientEvent('dispatch:gunshotAlert', -1, sentCoords, isAuto, isCop)
 end)
 
-RegisterNetEvent('erp-dispatch:combatAlert')
-AddEventHandler('erp-dispatch:combatAlert', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:combatAlert', -1, sentCoords)
+RegisterNetEvent('dispatch:combatAlert', function(sentCoords)
+    TriggerClientEvent('dispatch:combatAlert', -1, sentCoords)
 end)
 
-RegisterNetEvent('erp-dispatch:armedperson')
-AddEventHandler('erp-dispatch:armedperson', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:armedperson', -1, sentCoords)
+RegisterNetEvent('dispatch:armedperson', function(sentCoords)
+    TriggerClientEvent('dispatch:armedperson', -1, sentCoords)
 end)
 
-
-RegisterNetEvent('erp-dispatch:vehiclecrash')
-AddEventHandler('erp-dispatch:vehiclecrash', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:vehiclecrash', -1, sentCoords)
-end)
-
--- erp-dispatch:houserobbery
-
-RegisterNetEvent('erp-dispatch:houserobbery')
-AddEventHandler('erp-dispatch:houserobbery', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:houserobbery', -1, sentCoords)
-end)
-
--- erp-dispatch:banktruck
-
-RegisterNetEvent('erp-dispatch:banktruck')
-AddEventHandler('erp-dispatch:banktruck', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:banktruck', -1, sentCoords)
-end)
-
--- erp-dispatch:art
-
-RegisterNetEvent('erp-dispatch:art')
-AddEventHandler('erp-dispatch:art', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:art', -1, sentCoords)
-end)
-
--- erp-dispatch:jewel
-
-RegisterNetEvent('erp-dispatch:jewel')
-AddEventHandler('erp-dispatch:jewel', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:jewel', -1, sentCoords)
-end)
-
-RegisterNetEvent('erp-dispatch:bankwobbewy')
-AddEventHandler('erp-dispatch:bankwobbewy', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:bankwobbewy', -1, sentCoords)
-end)
-
-RegisterNetEvent('erp-dispatch:g6')
-AddEventHandler('erp-dispatch:g6', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:g6', -1, sentCoords)
+RegisterNetEvent('dispatch:vehiclecrash', function(sentCoords)
+    TriggerClientEvent('dispatch:vehiclecrash', -1, sentCoords)
 end)
 
 
-RegisterNetEvent('erp-dispatch:carboosting')
-AddEventHandler('erp-dispatch:carboosting', function(sentCoords, vehicle, alert)
-    TriggerClientEvent('erp-dispatch:carboosting', -1, sentCoords, vehicle, alert)
+RegisterNetEvent('dispatch:houserobbery', function(sentCoords)
+    TriggerClientEvent('dispatch:houserobbery', -1, sentCoords)
 end)
 
-RegisterNetEvent('erp-dispatch:yachtheist')
-AddEventHandler('erp-dispatch:yachtheist', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:yachtheist', -1, sentCoords)
+RegisterNetEvent('dispatch:banktruck', function(sentCoords)
+    TriggerClientEvent('dispatch:banktruck', -1, sentCoords)
 end)
 
-RegisterNetEvent('erp-dispatch:vehicletheft')
-AddEventHandler('erp-dispatch:vehicletheft', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:vehicletheft', -1, sentCoords)
+RegisterNetEvent('dispatch:art', function(sentCoords)
+    TriggerClientEvent('dispatch:art', -1, sentCoords)
 end)
 
-RegisterNetEvent('erp-dispatch:blip:jailbreak')
-AddEventHandler('erp-dispatch:blip:jailbreak', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:blip:jailbreak', -1, sentCoords)
+RegisterNetEvent('dispatch:jewel', function(sentCoords)
+    TriggerClientEvent('dispatch:jewel', -1, sentCoords)
 end)
 
-RegisterNetEvent('erp-dispatch:drugsale')
-AddEventHandler('erp-dispatch:drugsale', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:drugsale', -1, sentCoords)
+RegisterNetEvent('dispatch:bankrobbery', function(sentCoords)
+    TriggerClientEvent('dispatch:bankrobbery', -1, sentCoords)
 end)
 
-RegisterNetEvent('erp-dispatch:officerAlert')
-AddEventHandler('erp-dispatch:officerAlert', function(pos, name)
-    TriggerClientEvent('erp-dispatch:officerAlert', -1, pos, name, source)
+RegisterNetEvent('dispatch:g6', function(sentCoords)
+    TriggerClientEvent('dispatch:g6', -1, sentCoords)
+end)
+
+RegisterNetEvent('dispatch:carboosting', function(sentCoords, vehicle, alert)
+    TriggerClientEvent('dispatch:carboosting', -1, sentCoords, vehicle, alert)
+end)
+
+RegisterNetEvent('dispatch:yachtheist', function(sentCoords)
+    TriggerClientEvent('dispatch:yachtheist', -1, sentCoords)
+end)
+
+RegisterNetEvent('dispatch:vehicletheft', function(sentCoords)
+    TriggerClientEvent('dispatch:vehicletheft', -1, sentCoords)
+end)
+
+RegisterNetEvent('dispatch:blip:jailbreak', function(sentCoords)
+    TriggerClientEvent('dispatch:blip:jailbreak', -1, sentCoords)
+end)
+
+RegisterNetEvent('dispatch:drugsale', function(sentCoords)
+    TriggerClientEvent('dispatch:drugsale', -1, sentCoords)
+end)
+
+RegisterNetEvent('dispatch:officerAlert', function(pos, name)
+    TriggerClientEvent('dispatch:officerAlert', -1, pos, name, source)
 end)
 
 --[[ Officer downs ]]
 
-RegisterNetEvent('erp-dispatch:policealertA')
-AddEventHandler('erp-dispatch:policealertA', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:policealertA', -1, sentCoords)
+RegisterNetEvent('dispatch:policealertA', function(sentCoords)
+    TriggerClientEvent('dispatch:policealertA', -1, sentCoords)
 end)
 
-RegisterNetEvent('erp-dispatch:policealertB')
-AddEventHandler('erp-dispatch:policealertB', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:policealertB', -1, sentCoords)
+RegisterNetEvent('dispatch:policealertB', function(sentCoords)
+    TriggerClientEvent('dispatch:policealertB', -1, sentCoords)
 end)
 
--- CreateThread(function()
---     while true do
---         Wait(3600000) -- 1 hour
---         calls = {}
---     end
--- end)
 
-RegisterNetEvent('erp-dispatch:emsalertA')
-AddEventHandler('erp-dispatch:emsalertA', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:emsalertA', -1, sentCoords)
+RegisterNetEvent('dispatch:emsalertA', function(sentCoords)
+    TriggerClientEvent('dispatch:emsalertA', -1, sentCoords)
 end)
 
-RegisterNetEvent('erp-dispatch:emsalertB')
-AddEventHandler('erp-dispatch:emsalertB', function(sentCoords)
-    TriggerClientEvent('erp-dispatch:emsalertB', -1, sentCoords)
+RegisterNetEvent('dispatch:emsalertB', function(sentCoords)
+    TriggerClientEvent('dispatch:emsalertB', -1, sentCoords)
 end)
