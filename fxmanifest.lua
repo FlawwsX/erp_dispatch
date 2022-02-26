@@ -15,6 +15,9 @@ client_script '@PolyZone/client.lua'
 server_script 'sv_main.lua'
 client_script 'cl_main.lua'
 
+server_script 'sv_old.lua'
+client_script 'cl_old.lua'
+
 ui_page 'ui/index.html'
 
 files {
