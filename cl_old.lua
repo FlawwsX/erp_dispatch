@@ -178,6 +178,7 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
         local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
 
         local vehicleData = GetVehicleDescription() or {}
+        print(json.encode(vehicleData))
         local initialTenCode = "10-60"
         local isAuto = Config.KnownWeapons[sentWeapon]['isAuto']
 
