@@ -287,9 +287,9 @@ function GetVehicleDescription(sentVehicle)
     if color1 == -1 then color1 = 158 end
     if color2 == -1 then color2 = 158 end 
   
-    if math.random(1, 2) == math.random(1, 2) then
-      plate = "Unknown"
-    end
+    -- if math.random(1, 2) == math.random(1, 2) then
+    --     plate = "Unknown"
+    -- end
   
     local dir = getCardinalDirectionFromHeading()
   

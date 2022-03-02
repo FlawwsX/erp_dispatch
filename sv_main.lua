@@ -73,9 +73,11 @@ AddEventHandler("dispatch:removeUnit", function(callid, player, cb)
 end)
 
 AddEventHandler("dispatch:sendCallResponse", function(player, callid, message, time, cb)
+    local Player = QBCore.Functions.GetPlayer(player)
+    local name = Player.PlayerData.charinfo.firstname.. " " ..Player.PlayerData.charinfo.lastname
     if calls[callid] then
         table.insert(calls[callid]['responses'], {
-            name = player.fullname,
+            name = name,
             message = message,
             time = time
         })
