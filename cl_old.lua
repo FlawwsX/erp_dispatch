@@ -973,7 +973,7 @@ RegisterNetEvent('dispatch:drugjob',function()
     AlertDrugJob()
   end)
   
-  RegisterNetEvent('dispatch::fleeca:bankrobbery',function()
+  RegisterNetEvent('dispatch:fleeca:bankrobbery',function()
     AlertFleecaRobbery()
   end)
   
