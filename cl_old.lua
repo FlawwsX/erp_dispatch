@@ -248,6 +248,9 @@ RegisterCommand("13A", function ()
     TriggerEvent("ems:tenThirteenB")
 end)
 
+RegisterCommand("bankrobbery", function ()
+    TriggerEvent("dispatch:fleeca:bankrobbery")
+end)
 
 RegisterCommand('911', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
@@ -909,8 +912,8 @@ end
 
 function AlertFleecaRobbery()
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
-    local currentPos = GetEntityCoords(playerPed)
+    local gender = GetPedGender(PlayerPedId())
+    local currentPos = GetEntityCoords(PlayerPedId())
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local dispatchCode = "10-90"
@@ -970,7 +973,7 @@ RegisterNetEvent('dispatch:drugjob',function()
     AlertDrugJob()
   end)
   
-  RegisterNetEvent('dispatch:bankrobbery',function()
+  RegisterNetEvent('dispatch::fleeca:bankrobbery',function()
     AlertFleecaRobbery()
   end)
   
@@ -982,7 +985,7 @@ RegisterNetEvent('dispatch:drugjob',function()
     AlertCarBoost(boosted)
   end)
   
-  RegisterNetEvent('dispatch:bankrobbery:pacific',function()
+  RegisterNetEvent('dispatch:pacific:bankrobbery',function()
     AlertPacificRobbery()
   end)
   
