@@ -1,6 +1,11 @@
+--[[
+    These are just some extra alerts. These are not commented or edited. Not sure if they work.
+    Check README on how to add new alerts
+]]--
+
 function AlertBankTruck()
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
+    local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -59,7 +64,7 @@ end
 
 function AlertArt()
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
+    local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -118,7 +123,7 @@ end
 
 function AlertG6()
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
+    local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
@@ -145,7 +150,7 @@ end
 
 function AlertCarBoost(boosted)
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
+    local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local veh = NetworkGetEntityFromNetworkId(boosted)

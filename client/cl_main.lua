@@ -118,16 +118,9 @@ RegisterNetEvent('dispatch:manageNotifs', function(sentSetting)
     end
 end)
 
-RegisterNetEvent('alert:noPedCheck', function(alertType)
-    if alertType == "banktruck" then
-        AlertBankTruck()
-    elseif alertType == "yacht" then
-        AlertYacht()
-    elseif alertType == "art" then
-        AlertArt()
-    end
-end)
-
+--[[
+    All the functions triggered in the next event are present in cl_basealerts.lua
+]]--
 RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPassed,isGunshot,isHunting,sentWeapon)
     if PlayerJob == nil then return end
 
@@ -201,19 +194,8 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
         if dst > 50.5 and dst < 75.0 then
             DrugSale()
         end
-    elseif alertType == "druguse" and not underground and not pd then
-        if dst > 12.0 and dst < 18.0 then
-            DrugUse()
-        end
     elseif alertType == "carcrash" then
         CarCrash()
-    elseif alertType == "death" then
-        AlertDeath()
-        local roadtest2 = IsPointOnRoad(GetEntityCoords(PlayerPedId()), PlayerPedId())
-        if roadtest2 then return end
-        BringNpcs()
-    elseif alertType == "Suspicious" then
-        AlertSuspicious()
     elseif alertType == "fight" and not underground then
         AlertFight()
     elseif (alertType == "gunshot" or alertType == "gunshotvehicle") then
@@ -226,6 +208,10 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
         end
     end
 end)
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--makes the AI move towards player
 
 RegisterNetEvent('TriggerAIRunning', function(p)
     local usingped = p

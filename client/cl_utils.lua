@@ -103,3 +103,61 @@ RegisterNetEvent('dispatch:setBlip', function(type, pos, id)
         end
     end
 end)
+
+RegisterNetEvent('dispatch:clNotify', function(sNotificationData, sNotificationId, sender)
+    if sNotificationData ~= nil then
+        if sender == GetPlayerServerId(PlayerId()) and sNotificationData['dispatchCode'] == '911' then
+            SendNUIMessage({
+                update = "newCall",
+                callID = sNotificationId + math.random(1000, 9999),
+                data = {
+                    dispatchCode = '911',
+                    priority = 1,
+                    dispatchMessage = "Sent 911 call",
+                    information = "Thank you for sending a 911 call in, it has been received and is being processed."
+                },
+                timer = 5000,
+                isPolice = true
+            })
+        elseif sender == GetPlayerServerId(PlayerId()) and sNotificationData['dispatchCode'] == '311' then
+            SendNUIMessage({
+                update = "newCall",
+                callID = sNotificationId + math.random(1000, 9999),
+                data = {
+                    dispatchCode = '311',
+                    priority = 2,
+                    dispatchMessage = "Sent 311 call",
+                    information = "Thank you for sending a 311 call in, it has been received and is being processed."
+                },
+                timer = 5000,
+                isPolice = true
+            })
+        end
+        -- if not PlayerJob.onduty then return end;
+        local shouldAlert = false
+        for i=1, #sNotificationData['job'] do
+            if sNotificationData['job'][i] == PlayerJob.name then
+                shouldAlert = true
+                break
+            end
+        end
+        if shouldAlert then 
+            if not disableNotis then
+            if sNotificationData.origin ~= nil then
+                if sNotificationData.originStatic == nil or not sNotificationData.originStatic then
+                    sNotificationData.origin = randomizeBlipLocation(sNotificationData.origin)
+                    else
+                    sNotificationData.origin = sNotificationData.origin
+                    end
+                end
+                SendNUIMessage({
+                    update = "newCall",
+                    callID = sNotificationId,
+                    data = sNotificationData,
+                    timer = 5000,
+                    isPolice = IsPoliceJob(PlayerJob.name)
+                })
+            end
+        end
+    end
+end)

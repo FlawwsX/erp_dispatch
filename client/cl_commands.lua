@@ -46,7 +46,7 @@ RegisterCommand('311', function(source, args, rawCommand)
     end
 end)
 
------Test Commands----------
+-----Test Commands Remove after the script is in 1.0----------
 RegisterCommand("13A", function ()
     TriggerEvent("ems:tenThirteenB")
 end)
