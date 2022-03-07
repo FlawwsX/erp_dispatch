@@ -1,14 +1,10 @@
 -- house robbery
 --[[
-    To trigger this alert for House robbery, use the following eventPrefix
-    TriggerEvent("qb-dispatch:client:houserobbery")
+    To trigger this alert for House robbery, trigger the following export in any client file.
+    exports['qb-dispatch']:HouseRobberyAlert()
 ]]--
 
-RegisterNetEvent("qb-dispatch:client:houserobbery",function()
-    AlertHouseRobbery()
-end)
-
-function AlertHouseRobbery()
+local function AlertHouseRobbery()
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
@@ -65,6 +61,8 @@ function AlertHouseRobbery()
     end
 end
 
+exports('HouseRobberyAlert', AlertHouseRobbery)
+
 RegisterNetEvent('dispatch:houserobbery', function(targetCoords)
     if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
@@ -96,15 +94,11 @@ end)
 -- Jewellery robbery
 
 --[[
-    To trigger this alert for Jewellery robbery, use the following eventPrefix
-    TriggerEvent("qb-dispatch:client:jewelrobbery")
+    To trigger this alert for Jewellery robbery, trigger the following export in any client file.
+    exports['qb-dispatch']:JewlRobAlert()
 ]]--
-RegisterNetEvent('qb-dispatch:client:jewelrobbery',function()
-    AlertJewelRob()
-end)
 
-
-function AlertJewelRob()
+local function AlertJewelRob()
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
@@ -161,8 +155,9 @@ function AlertJewelRob()
     end
 end
 
+exports('JewlRobAlert', AlertJewelRob)
+
 RegisterNetEvent('dispatch:jewel', function(targetCoords)
-    
     if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)

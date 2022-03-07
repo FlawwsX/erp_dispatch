@@ -5,9 +5,6 @@ onDuty = false
 
 local callID = 0
 local currentCallSign = ""
-local playerPed, playerCoords = PlayerPedId(), vec3(0, 0, 0)
-local currentVehicle, inVehicle, currentlyArmed, currentWeapon = nil, false, false, `WEAPON_UNARMED`
-local inHuntingZone = false
 
 QBCore = exports["qb-core"]:GetCoreObject()
 
@@ -25,7 +22,6 @@ end)
 -- core related
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    isLoggedIn = true
     PlayerData= QBCore.Functions.GetPlayerData()
     PlayerJob  = QBCore.Functions.GetPlayerData().job
     generateHuntingZones()
@@ -35,7 +31,6 @@ end)
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
 	PlayerData = {}
     currentCallSign = ""
-    currentVehicle, inVehicle, currentlyArmed, currentWeapon = nil, false, false, `WEAPON_UNARMED`
     removeHuntingZones()
 end)
 

@@ -19,8 +19,8 @@ function GetPedGender()
     return gender
 end
 
--- function to get the direction name based on heading of player
-function getCardinalDirectionFromHeading()
+-- function to get the direction name based on heading of player we only use this in GetVehicleDescription function therefor its localized
+local function getCardinalDirectionFromHeading()
     local heading = GetEntityHeading(PlayerPedId())
     if heading >= 315 or heading < 45 then return "North Bound"
     elseif heading >= 45 and heading < 135 then return "West Bound"
@@ -111,6 +111,7 @@ end
 
 -- Return vehicle related information like color, plate, make 
 function GetVehicleDescription(sentVehicle)
+    local currentVehicle
     if not sentVehicle or sentVehicle == nil then
         local currentVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
         if not DoesEntityExist(currentVehicle) then
@@ -119,9 +120,9 @@ function GetVehicleDescription(sentVehicle)
     elseif sentVehicle then
         currentVehicle = sentVehicle
     end
-    plate = GetVehicleNumberPlateText(currentVehicle)
-    make = GetDisplayNameFromVehicleModel(GetEntityModel(currentVehicle))
-    color1, color2 = GetVehicleColours(currentVehicle)
+    local plate = GetVehicleNumberPlateText(currentVehicle)
+    local make = GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(currentVehicle)))
+    local color1, color2 = GetVehicleColours(currentVehicle)
     if color1 == 0 then color1 = 1 end
     if color2 == 0 then color2 = 2 end
     if color1 == -1 then color1 = 158 end
@@ -138,7 +139,7 @@ function GetVehicleDescription(sentVehicle)
 end
 
 -- This event is called when an alert goes off, it determines the closest peds near the player and whether they should start running towards the scene of crime or not to make it more realistic.
-function canPedBeUsed(ped,isGunshot,isSpeeder)
+local function canPedBeUsed(ped,isGunshot,isSpeeder)
     if math.random(100) > 15 then
         return false
     end
@@ -257,18 +258,16 @@ end
 -- Should the npc near the crime go towards the player location
 function BringNpcs()
     for i = 1, #curWatchingPeds do
-    if DoesEntityExist(curWatchingPeds[i]) then
-        ClearPedTasks(curWatchingPeds[i])
-        SetEntityAsNoLongerNeeded(curWatchingPeds[i])
+        if DoesEntityExist(curWatchingPeds[i]) then
+            ClearPedTasks(curWatchingPeds[i])
+            SetEntityAsNoLongerNeeded(curWatchingPeds[i])
+        end
     end
-    end
-    curWatchingPeds = {}
+    local curWatchingPeds = {}
     local basedistance = 35.0
     local playerCoords = GetEntityCoords(PlayerPedId())
     local handle, ped = FindFirstPed()
     local success
-    local rped = nil
-    local distanceFrom
     repeat
         local pos = GetEntityCoords(ped)
         local distance = #(playerCoords - pos)
