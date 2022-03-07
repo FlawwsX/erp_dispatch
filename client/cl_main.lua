@@ -161,7 +161,7 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
         if not isSpeeder and alertType ~= "robberyhouse" then
             Wait(500)
             if GetEntityHealth(nearNPC) == 0 then
-            return
+                return
             end
             if not DoesEntityExist(nearNPC) then
                 return
@@ -233,12 +233,12 @@ RegisterNetEvent('TriggerAIRunning', function(p)
     while dist > 3.5 and (imdead == 1 or imcollapsed == 1) do
         TaskGoStraightToCoord(usingped, moveto, 2.5, -1, 0.0, 0.0)
         dist = #(moveto - GetEntityCoords(usingped))
-        Citizen.Wait(100)
+        Wait(100)
     end
     ClearPedTasksImmediately(ped)
     TaskLookAtEntity(usingped, PlayerPedId(), 5500.0, 2048, 3)
     TaskTurnPedToFaceEntity(usingped, PlayerPedId(), 5500)
-    Citizen.Wait(3000)
+    Wait(3000)
     if math.random(3) == 2 then
         TaskStartScenarioInPlace(usingped, Config.TasksIdle[2], 0, 1)
     elseif math.random(1, 2) == 1 then
@@ -249,12 +249,12 @@ RegisterNetEvent('TriggerAIRunning', function(p)
     end
     SetPedKeepTask(usingped, true) 
     while imdead == 1 or imcollapsed == 1 do
-        Citizen.Wait(1)
+        Wait(1)
         if not IsPedFacingPed(usingped, PlayerPedId(), 15.0) then
             ClearPedTasksImmediately(ped)
             TaskLookAtEntity(usingped, PlayerPedId(), 5500.0, 2048, 3)
             TaskTurnPedToFaceEntity(usingped, PlayerPedId(), 5500)
-            Citizen.Wait(3000)
+            Wait(3000)
         end
     end
     SetEntityAsNoLongerNeeded(usingped)

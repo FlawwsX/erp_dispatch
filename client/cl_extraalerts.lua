@@ -8,7 +8,6 @@ function AlertBankTruck()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local dispatchCode = "10-90"
 
     TriggerServerEvent('dispatch:banktruck', currentPos)
@@ -57,7 +56,6 @@ function AlertBankTruck()
                 })
                 TriggerServerEvent('dispatch:banktruck', newPos)
             end
-            return
         end)
     end
 end
@@ -67,7 +65,6 @@ function AlertArt()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local dispatchCode = "10-90"
 
     TriggerServerEvent('dispatch:art', currentPos)
@@ -116,7 +113,6 @@ function AlertArt()
                 })
                 TriggerServerEvent('dispatch:art', newPos)
             end
-            return
         end)
     end
 end
@@ -125,8 +121,6 @@ function AlertG6()
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
-    local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local dispatchCode = "10-90"
 
     TriggerServerEvent('dispatch:g6', currentPos)
@@ -152,7 +146,6 @@ function AlertCarBoost(boosted)
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
-    local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local veh = NetworkGetEntityFromNetworkId(boosted)
     local currentVeh = veh
     local dispatchCode = "10-81"
@@ -179,9 +172,9 @@ function AlertCarBoost(boosted)
         job = Config.PoliceJob
     })
 
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
-            Citizen.Wait(10000)
+            Wait(10000)
             hacked = Entity(currentVeh).state.hacked
             if not hacked and DoesEntityExist(currentVeh) then
                 currentPos = GetEntityCoords(currentVeh)
@@ -194,17 +187,15 @@ end
 
 RegisterNetEvent('dispatch:carboost',function(boosted)
     AlertCarBoost(boosted)
-  end)
-  
-    
-  RegisterNetEvent('dispatch:AlertG6',function()
+end)
+
+RegisterNetEvent('dispatch:AlertG6',function()
     AlertG6()
 end)
 
   
 RegisterNetEvent('dispatch:banktruck', function(targetCoords)
-      
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -218,7 +209,7 @@ RegisterNetEvent('dispatch:banktruck', function(targetCoords)
         TriggerEvent("sounds:PlayOnOne","metaldetected",0.1)
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(truck, alpha)
 
@@ -231,8 +222,7 @@ RegisterNetEvent('dispatch:banktruck', function(targetCoords)
 end)
 
 RegisterNetEvent('dispatch:art', function(targetCoords)
-    
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local gallery = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -246,7 +236,7 @@ RegisterNetEvent('dispatch:art', function(targetCoords)
         TriggerEvent("sounds:PlayOnOne","metaldetected",0.1)
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(gallery, alpha)
 
@@ -259,7 +249,7 @@ RegisterNetEvent('dispatch:art', function(targetCoords)
 end)
 
 RegisterNetEvent('dispatch:g6', function(targetCoords)
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local g6 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -273,7 +263,7 @@ RegisterNetEvent('dispatch:g6', function(targetCoords)
         TriggerEvent("sounds:PlayOnOne","metaldetected",0.1)
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(g6, alpha)
 
@@ -287,7 +277,7 @@ end)
 
   
 RegisterNetEvent('dispatch:carboosting', function(targetCoords, vehicle, alert)
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local carboosting = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
         local hacked = false
@@ -304,7 +294,7 @@ RegisterNetEvent('dispatch:carboosting', function(targetCoords, vehicle, alert)
 
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 10
             SetBlipAlpha(carboosting, alpha)
 
@@ -317,7 +307,7 @@ end)
 
   
 RegisterNetEvent('dispatch:mz:lockdown', function(targetCoords) 
-    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
+    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and onDuty then	
         local alpha = 250
         local policedown2 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -331,7 +321,7 @@ RegisterNetEvent('dispatch:mz:lockdown', function(targetCoords)
         PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
 
         while alpha ~= 0 do
-            Citizen.Wait(200 * 4)
+            Wait(200 * 4)
             alpha = alpha - 1
             SetBlipAlpha(policedown2, alpha)
 
@@ -344,13 +334,13 @@ RegisterNetEvent('dispatch:mz:lockdown', function(targetCoords)
 end)
 
 RegisterNetEvent('dispatch:mz:lockdownoff', function(targetCoords) 
-    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
+    if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and onDuty then	
         QBCore.Functions.Notify("Mount Zonah is no longer on lockdown", "success")
     end
 end)
 
 RegisterNetEvent('dispatch:yachtheist', function(targetCoords)
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
         SetBlipSprite(truck,  455)
@@ -362,7 +352,7 @@ RegisterNetEvent('dispatch:yachtheist', function(targetCoords)
         EndTextCommandSetBlipName(truck)
         TriggerEvent("sounds:PlayOnOne","metaldetected",0.1)
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(truck, alpha)
             if alpha == 0 then

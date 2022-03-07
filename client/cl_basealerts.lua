@@ -38,7 +38,7 @@ end
 
 RegisterNetEvent('dispatch:vehiclecrash', function(targetCoords)
     
-    if (IsPoliceJob(PlayerJob.name)) and PlayerJob.onduty then	
+    if (IsPoliceJob(PlayerJob.name)) and onDuty then	
         local alpha = 250
         local injured = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -52,7 +52,7 @@ RegisterNetEvent('dispatch:vehiclecrash', function(targetCoords)
         PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(injured, alpha)
 
@@ -140,7 +140,7 @@ end
 
 RegisterNetEvent('dispatch:armedperson', function(sentCoords)
     if sentCoords then
-        if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then 
+        if IsPoliceJob(PlayerJob.name) and onDuty then 
             local alpha = 250
             local armedperson = AddBlipForCoord(sentCoords)
             SetBlipScale(armedperson, 1.0)
@@ -156,7 +156,7 @@ RegisterNetEvent('dispatch:armedperson', function(sentCoords)
             
             CreateThread(function()
                 while alpha ~= 0 and DoesBlipExist(armedperson) do
-                    Citizen.Wait(90 * 4)
+                    Wait(90 * 4)
                     alpha = alpha - 1
                     SetBlipAlpha(armedperson, alpha)
     
@@ -165,7 +165,6 @@ RegisterNetEvent('dispatch:armedperson', function(sentCoords)
                         return
                     end
                 end
-                return
             end)
         end
     end 
@@ -230,14 +229,13 @@ function AlertFight()
                 })
                 TriggerServerEvent('dispatch:combatAlert', newPos)
             end
-            return
         end)
     end
 end
 
 RegisterNetEvent('dispatch:combatAlert', function(sentCoords)
     if sentCoords then
-        if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then
+        if IsPoliceJob(PlayerJob.name) and onDuty then
             local alpha = 250
             local combatBlip = AddBlipForCoord(sentCoords)
 
@@ -254,7 +252,7 @@ RegisterNetEvent('dispatch:combatAlert', function(sentCoords)
             
             CreateThread(function()
                 while alpha ~= 0 and DoesBlipExist(combatBlip) do
-                    Citizen.Wait(90 * 4)
+                    Wait(90 * 4)
                     alpha = alpha - 1
                     SetBlipAlpha(combatBlip, alpha)
     
@@ -263,7 +261,6 @@ RegisterNetEvent('dispatch:combatAlert', function(sentCoords)
                         return
                     end
                 end
-                return
             end)
         end
     end 
@@ -339,7 +336,6 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
                     })
                     TriggerServerEvent('dispatch:gunshotAlert', newPos, false, IsPoliceJob(PlayerJob.name))
                 end
-                return
             end)
         end
     end
@@ -368,7 +364,7 @@ RegisterNetEvent('dispatch:gunshotAlert', function(sentCoords, isAuto, isCop)
             
             CreateThread(function()
                 while blipAlpha ~= 0 and DoesBlipExist(gunshotBlip) do
-                    Citizen.Wait(math.random(20, 30) * 4)
+                    Wait(math.random(50, 300) * 4) -- Here we have the wait time to determaine the transparancy of the GunShot alert decreasing these numbers will make it go away faster and vise versa
                     blipAlpha = blipAlpha - 1
                     SetBlipAlpha(gunshotBlip, blipAlpha)
     
@@ -377,7 +373,6 @@ RegisterNetEvent('dispatch:gunshotAlert', function(sentCoords, isAuto, isCop)
                         return
                     end
                 end
-                return
             end)
         end 
     end 
@@ -448,13 +443,12 @@ function DrugSale()
                 })
                 TriggerServerEvent('dispatch:drugsale', newPos)
             end
-            return
         end)
     end
 end
 
 RegisterNetEvent('dispatch:drugsale', function(sentCoords)
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local drugsale = AddBlipForCoord(sentCoords)
 
@@ -468,7 +462,7 @@ RegisterNetEvent('dispatch:drugsale', function(sentCoords)
         PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(drugsale, alpha)
 

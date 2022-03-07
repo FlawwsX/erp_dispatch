@@ -12,7 +12,6 @@ CreateThread(function()
 end)
 
 -- gunshots
-
 CreateThread(function() -- Gun Shots
     local isBusyGunShots, armed, cooldownGS, cooldownSMD = false, false, 0, 0
     while true do
@@ -65,7 +64,6 @@ CreateThread(function() -- Gun Shots
 end)
 
 -- fights
-
 CreateThread(function() -- Fighting
     local isBusy, cooldown = false, 0
     while true do 

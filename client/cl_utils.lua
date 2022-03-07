@@ -1,11 +1,12 @@
 PlayerData = {}
 PlayerJob = {}
+onDuty = false
+
 
 local callID = 0
 local currentCallSign = ""
 local playerPed, playerCoords = PlayerPedId(), vec3(0, 0, 0)
 local currentVehicle, inVehicle, currentlyArmed, currentWeapon = nil, false, false, `WEAPON_UNARMED`
-local HuntingZones = {}
 local inHuntingZone = false
 
 QBCore = exports["qb-core"]:GetCoreObject()
@@ -17,6 +18,8 @@ CreateThread(function()
     end
     PlayerData = QBCore.Functions.GetPlayerData()
     PlayerJob  = QBCore.Functions.GetPlayerData().job
+    Wait(50)
+    onDuty = PlayerJob.onduty
 end)
 
 -- core related
@@ -26,6 +29,7 @@ RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerData= QBCore.Functions.GetPlayerData()
     PlayerJob  = QBCore.Functions.GetPlayerData().job
     generateHuntingZones()
+    onDuty = PlayerJob.onduty
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
@@ -39,9 +43,13 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerJob = JobInfo
 end)
 
+RegisterNetEvent('QBCore:Client:SetDuty', function(duty)
+    onDuty = duty
+end)
+
 --------- Event to set blips-----------------
 RegisterNetEvent('dispatch:setBlip', function(type, pos, id)
-    if (IsPoliceJob(PlayerJob.name) or PlayerJob.name == 'ambulance') and PlayerJob.onduty then	
+    if (IsPoliceJob(PlayerJob.name) or PlayerJob.name == 'ambulance') and onDuty then	
         PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
         PlaySoundFrontend(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", 0)
             
@@ -64,7 +72,7 @@ RegisterNetEvent('dispatch:setBlip', function(type, pos, id)
             
         
             while alpha ~= 0 do
-                Citizen.Wait(240 * 4)
+                Wait(240 * 4)
                 alpha = alpha - 1
                 SetBlipAlpha(call, alpha)
 
@@ -91,7 +99,7 @@ RegisterNetEvent('dispatch:setBlip', function(type, pos, id)
             EndTextCommandSetBlipName(call)
 
             while alpha ~= 0 do
-                Citizen.Wait(240 * 4)
+                Wait(240 * 4)
                 alpha = alpha - 1
                 SetBlipAlpha(call, alpha)
 
@@ -133,7 +141,8 @@ RegisterNetEvent('dispatch:clNotify', function(sNotificationData, sNotificationI
                 isPolice = true
             })
         end
-        -- if not PlayerJob.onduty then return end;
+
+        if not onDuty then return end; -- Makes it so there's no alerts if you are NOT on Duty!
         local shouldAlert = false
         for i=1, #sNotificationData['job'] do
             if sNotificationData['job'][i] == PlayerJob.name then

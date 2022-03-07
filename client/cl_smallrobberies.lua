@@ -4,8 +4,7 @@
     TriggerEvent("qb-dispatch:client:houserobbery")
 ]]--
 
-RegisterNetEvent('qb-dispatch:client:houserobbery')
-AddEventHandler("qb-dispatch:client:houserobbery",function()
+RegisterNetEvent("qb-dispatch:client:houserobbery",function()
     AlertHouseRobbery()
 end)
 
@@ -14,7 +13,6 @@ function AlertHouseRobbery()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local dispatchCode = "10-33"
 
     TriggerServerEvent('dispatch:houserobbery', currentPos)
@@ -63,13 +61,12 @@ function AlertHouseRobbery()
                 })
                 TriggerServerEvent('dispatch:houserobbery', newPos)
             end
-            return
         end)
     end
 end
 
 RegisterNetEvent('dispatch:houserobbery', function(targetCoords)
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local burglary = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
         SetBlipHighDetail(burglary, true)
@@ -83,7 +80,7 @@ RegisterNetEvent('dispatch:houserobbery', function(targetCoords)
         PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(burglary, alpha)
             if alpha == 0 then
@@ -112,7 +109,6 @@ function AlertJewelRob()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local dispatchCode = "10-90"
 
     TriggerServerEvent('dispatch:jewel', currentPos)
@@ -161,14 +157,13 @@ function AlertJewelRob()
                 })
                 TriggerServerEvent('dispatch:jewel', newPos)
             end
-            return
         end)
     end
 end
 
 RegisterNetEvent('dispatch:jewel', function(targetCoords)
     
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -182,7 +177,7 @@ RegisterNetEvent('dispatch:jewel', function(targetCoords)
         TriggerEvent("sounds:PlayOnOne","metaldetected",0.1)
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(truck, alpha)
             if alpha == 0 then

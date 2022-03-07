@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 author 'Flawws & Flakey'
-description 'This is the EchoRP Dispatch System'
+description 'qb-dispatch edited to suit QBCore by Project Sloth, originally created by Flawws & Flakey for their EchoRP server.'
 version '1.0.0'
 
 lua54 'yes'

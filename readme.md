@@ -87,7 +87,7 @@ end)
 ```lua
 RegisterNetEvent('dispatch:client:testalert', function(targetCoords)
       
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	-- do the job check before setting the blips
+    if IsPoliceJob(PlayerJob.name) and onDuty then	-- do the job check before setting the blips
         local alpha = 250 --increase this value for longer blips
         local testblip = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -100,7 +100,7 @@ RegisterNetEvent('dispatch:client:testalert', function(targetCoords)
         EndTextCommandSetBlipName(testblip)
         -- waits for 480 * alpha for the blip to disappear, if you want longer blips, increase alpha value
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4) 
+            Wait(120 * 4) 
             alpha = alpha - 1
             SetBlipAlpha(testblip, alpha)
 

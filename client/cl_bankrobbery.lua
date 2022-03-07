@@ -14,7 +14,6 @@ function AlertFleecaRobbery()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local dispatchCode = "10-90"
 
     TriggerServerEvent('dispatch:bankrobbery', currentPos)
@@ -63,7 +62,6 @@ function AlertFleecaRobbery()
                 })
                 TriggerServerEvent('dispatch:bankrobbery', newPos)
             end
-            return
         end)
     end
 end
@@ -133,7 +131,6 @@ function AlertPaletoRobbery()
                 })
                 TriggerServerEvent('dispatch:bankrobbery', newPos)
             end
-            return
         end)
     end
 end
@@ -155,7 +152,6 @@ function AlertPacificRobbery()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local dispatchCode = "10-90"
 
     TriggerServerEvent('dispatch:bankrobbery', currentPos)
@@ -202,7 +198,6 @@ function AlertPacificRobbery()
                 })
                 TriggerServerEvent('dispatch:bankrobbery', newPos)
             end
-            return
         end)
     end
 end
@@ -218,7 +213,7 @@ end
 ----------------------------------------------Helper Function for bank robbery (Do not touch this unless you know what you are doing)
 
 RegisterNetEvent('dispatch:bankrobbery', function(targetCoords)
-    if IsPoliceJob(PlayerJob.name) and PlayerJob.onduty then	
+    if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local bankrobbery = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
 
@@ -232,7 +227,7 @@ RegisterNetEvent('dispatch:bankrobbery', function(targetCoords)
         TriggerEvent("sounds:PlayOnOne","metaldetected",0.1)
 
         while alpha ~= 0 do
-            Citizen.Wait(120 * 4)
+            Wait(120 * 4)
             alpha = alpha - 1
             SetBlipAlpha(bankrobbery, alpha)
 
