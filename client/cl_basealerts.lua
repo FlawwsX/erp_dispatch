@@ -9,7 +9,6 @@ function CarCrash()
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
-    local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     if currentVeh == 0 or GetVehicleNumberPlateText(currentVeh) == nil then currentVeh = GetVehiclePedIsIn(PlayerPedId(), true) end
     local vehicleData = GetVehicleDescription(currentVeh) or {}
@@ -76,7 +75,6 @@ function AlertCheckLockpick()
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
-    local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local currentVeh = GetVehiclePedIsIn(PlayerPedId(), false)
     local vehicleData = GetVehicleDescription(currentVeh) or {}
     local dispatchCode = "10-90"
@@ -111,7 +109,6 @@ function ArmedPlayer() -- When aiming weapon.
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
-    local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
     local vehicleData = GetVehicleDescription() or {}
     local initialTenCode = "10-44"
     
@@ -279,8 +276,7 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
 
         local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
 
-        local vehicleData = GetVehicleDescription() or {}
-        print(json.encode(vehicleData))
+        local vehicleData = GetVehicleDescription(GetVehiclePedIsIn(PlayerPedId(), false)) or {}
         local initialTenCode = "10-60"
         local isAuto = Config.KnownWeapons[sentWeapon]['isAuto']
 

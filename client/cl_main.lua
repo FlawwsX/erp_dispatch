@@ -6,7 +6,6 @@ RegisterCommand("dtest", function ()
         sprite = 310,
         color = 1,
         scale = 0.7,
-        name = "Custom Alert",
         blipTick = 2000,
         alpha = 250,
         coords = coords,
@@ -19,7 +18,7 @@ RegisterCommand("dtest", function ()
         firstStreet = GetStreetAndZone(),
         name = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname,
         priority = 1,
-        gender = GetPedGender(ped),
+        gender = GetPedGender(),
         origin = {
             x = coords.x,
             y = coords.y,
@@ -121,6 +120,7 @@ end)
 --[[
     All the functions triggered in the next event are present in cl_basealerts.lua
 ]]--
+local friendlytype = nil
 RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPassed,isGunshot,isHunting,sentWeapon)
     if PlayerJob == nil then return end
 
@@ -140,7 +140,7 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
     local plyCoords = GetEntityCoords(PlayerPedId())
 
     if isGunshot then
-        shittypefuckyou = 'gunshot'
+        friendlytype = 'gunshot'
     end
 
     local nearNPC
@@ -148,7 +148,7 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
     if alertType == 'drugsale' then
         nearNPC = GetClosestNPC(plyCoords, basedistance, 'combat', object)
     else
-        nearNPC = GetClosestNPC(plyCoords, basedistance, shittypefuckyou)
+        nearNPC = GetClosestNPC(plyCoords, basedistance, friendlytype)
     end 
 
     local dst = 0
@@ -190,20 +190,20 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
     local isUnderground = false
     if plyCoords.z <= -25 then isUnderground = true end
 
-    if alertType == "drugsale" and not underground --[[and not isPolice]] then
+    if alertType == "drugsale" and not isUnderground --[[and not isPolice]] then
         if dst > 50.5 and dst < 75.0 then
             DrugSale()
         end
     elseif alertType == "carcrash" then
         CarCrash()
-    elseif alertType == "fight" and not underground then
+    elseif alertType == "fight" and not isUnderground then
         AlertFight()
     elseif (alertType == "gunshot" or alertType == "gunshotvehicle") then
         AlertGunShot(isHunting, sentWeapon)
     elseif alertType == "lockpick" then
         if dst > 5.0 and dst < 85.0 then
             if math.random(100) >= 25 then
-                AlertCheckLockpick(object)
+                AlertCheckLockpick()
             end
         end
     end

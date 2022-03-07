@@ -1,3 +1,6 @@
+local currentVehicle, inVehicle, currentlyArmed, currentWeapon = nil, false, false, `WEAPON_UNARMED`
+local playerPed, playerCoords = PlayerPedId(), vec3(0, 0, 0)
+
 -- loop to update playerped, coords, if in vehicle, etc.
 CreateThread(function()
 	while true do

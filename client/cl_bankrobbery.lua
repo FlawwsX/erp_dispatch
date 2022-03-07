@@ -1,15 +1,11 @@
 --Fleeca bankrobbery
 
 --[[
-    To trigger this alert for fleeca robbery, use the following eventPrefix
-    TriggerEvent("qb-dispatch:fleeca:bankrobbery")
+    To trigger this alert for fleeca robbery, trigger the following export in any client file.
+    exports['qb-dispatch']:AddFleecaAlert()
 ]]--
 
-RegisterNetEvent('qb-dispatch:fleeca:bankrobbery',function()
-    AlertFleecaRobbery()
-end)
-
-function AlertFleecaRobbery()
+local function AlertFleecaRobbery()
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
@@ -66,19 +62,16 @@ function AlertFleecaRobbery()
     end
 end
 
+exports('AddFleecaAlert', AlertFleecaRobbery)
+
 ----Paleto Bay Bank Robbery Alert
 
 --[[
-    To trigger this alert for fleeca robbery, use the following eventPrefix
-    TriggerEvent("qb-dispatch:paleto:bankrobbery")
+    To trigger this alert for Paleto Robbery, trigger the following export in any client file.
+    exports['qb-dispatch']:AddPaletoAlert()
 ]]--
 
-
-RegisterNetEvent('qb-dispatch:paleto:bankrobbery',function()
-    AlertPaletoRobbery()
-end)
-
-function AlertPaletoRobbery()
+local function AlertPaletoRobbery()
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
@@ -135,19 +128,16 @@ function AlertPaletoRobbery()
     end
 end
 
+exports('AddPaletoAlert', AlertPaletoRobbery)
+
 -- pacific bank robbery alert
 
 --[[
-    To trigger this alert for fleeca robbery, use the following eventPrefix
-    TriggerEvent("qb-dispatch:pacific:bankrobbery")
+    To trigger this alert for Pacific Robbery, trigger the following export in any client file.
+    exports['qb-dispatch']:AddPacificAlert()
 ]]--
 
-
-RegisterNetEvent('dispatch:pacific:bankrobbery',function()
-    AlertPacificRobbery()
-end)
-
-function AlertPacificRobbery()
+local function AlertPacificRobbery()
     local locationInfo = GetStreetAndZone()
     local gender = GetPedGender()
     local currentPos = GetEntityCoords(PlayerPedId())
@@ -201,6 +191,8 @@ function AlertPacificRobbery()
         end)
     end
 end
+
+exports('AddPacificAlert', AlertPacificRobbery)
 
 --[[
     If you want to add more robberies, add below this and give documentation of how to use it. try to follow the naming conventions and comments.
