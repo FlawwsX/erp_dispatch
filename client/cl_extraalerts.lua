@@ -1,9 +1,14 @@
+--[[
+    These are just some extra alerts. These are not commented or edited. Not sure if they work.
+    Check README on how to add new alerts
+]]--
+
 function AlertBankTruck()
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
+    local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local dispatchCode = "10-46"
+    local dispatchCode = "10-90"
 
     TriggerServerEvent('dispatch:banktruck', currentPos)
 
@@ -51,17 +56,16 @@ function AlertBankTruck()
                 })
                 TriggerServerEvent('dispatch:banktruck', newPos)
             end
-            return
         end)
     end
 end
 
 function AlertArt()
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
+    local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local isInVehicle = IsPedInAnyVehicle(PlayerPedId())
-    local dispatchCode = "10-97"
+    local dispatchCode = "10-90"
 
     TriggerServerEvent('dispatch:art', currentPos)
 
@@ -109,14 +113,13 @@ function AlertArt()
                 })
                 TriggerServerEvent('dispatch:art', newPos)
             end
-            return
         end)
     end
 end
 
-function AlertG6() -- whats the difference between this and banktruck?
+function AlertG6()
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
+    local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local dispatchCode = "10-90"
 
@@ -141,7 +144,7 @@ end
 
 function AlertCarBoost(boosted)
     local locationInfo = GetStreetAndZone()
-    local gender = GetPedGender(playerPed)
+    local gender = GetPedGender()
     local currentPos = GetEntityCoords(playerPed)
     local veh = NetworkGetEntityFromNetworkId(boosted)
     local currentVeh = veh
@@ -184,16 +187,14 @@ end
 
 RegisterNetEvent('dispatch:carboost',function(boosted)
     AlertCarBoost(boosted)
-  end)
-  
-    
-  RegisterNetEvent('dispatch:AlertG6',function()
+end)
+
+RegisterNetEvent('dispatch:AlertG6',function()
     AlertG6()
 end)
 
   
 RegisterNetEvent('dispatch:banktruck', function(targetCoords)
-      
     if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local truck = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
@@ -221,7 +222,6 @@ RegisterNetEvent('dispatch:banktruck', function(targetCoords)
 end)
 
 RegisterNetEvent('dispatch:art', function(targetCoords)
-    
     if IsPoliceJob(PlayerJob.name) and onDuty then	
         local alpha = 250
         local gallery = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)

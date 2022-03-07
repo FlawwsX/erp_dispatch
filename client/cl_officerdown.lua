@@ -1,14 +1,18 @@
-RegisterNetEvent('ems:tenThirteenA', function()
+local tenThirteenAC = false
+local tenThirteenBC = false
+
+--[[
+    For EMS 14A (Urgent)
+    To trigger this alert, use the following event
+    TriggerEvent("qb-dispatch:ems:14a")
+]]--
+
+RegisterNetEvent('qb-dispatch:client:ems14A', function()
     if tenThirteenAC then return end;
-    
     if PlayerJob.name == 'ambulance' then	
-       
         local pos = GetEntityCoords(PlayerPedId(),  true)
         local plyData = QBCore.Functions.GetPlayerData()
-
-
         local job = {"police", "ambulance"}
-
         TriggerServerEvent("dispatch:svNotify", {
             dispatchCode = "10-14A",
             firstStreet = GetStreetAndZone(),
@@ -23,7 +27,6 @@ RegisterNetEvent('ems:tenThirteenA', function()
             },
             job = job
         })
-        
         TriggerServerEvent('dispatch:emsalertA', pos)
         
         CreateThread(function()
@@ -48,7 +51,6 @@ RegisterNetEvent('dispatch:emsalertA', function(targetCoords)
         AddTextComponentString('10-14A Medic Down')
         EndTextCommandSetBlipName(policedown)
         PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
-
         while alpha ~= 0 do
             Wait(120 * 4)
             alpha = alpha - 1
@@ -62,14 +64,17 @@ RegisterNetEvent('dispatch:emsalertA', function(targetCoords)
     end
 end)
 
-RegisterNetEvent('ems:tenThirteenB', function()
+--[[
+    For EMS 14B (Non Urgent)
+    To trigger this alert, use the following event
+    TriggerEvent("qb-dispatch:ems:14b")
+]]--
+
+RegisterNetEvent('qb-dispatch:client:ems14B', function()
     if tenThirteenBC then return end;
-    
     if PlayerJob.name == 'ambulance' then	
         local pos = GetEntityCoords(PlayerPedId(),  true)
-        
         local plyData = QBCore.Functions.GetPlayerData()
-
         TriggerServerEvent("dispatch:svNotify", {
             dispatchCode = "10-14B",
             firstStreet = GetStreetAndZone(),
@@ -85,13 +90,11 @@ RegisterNetEvent('ems:tenThirteenB', function()
             },
             job = {"police", "ambulance"}
         })
-
         CreateThread(function()
             tenThirteenBC = true
             Wait(30000)
             tenThirteenBC = false
         end)
-
         TriggerServerEvent('dispatch:emsalertB', pos)
     end
 end)
@@ -109,7 +112,6 @@ RegisterNetEvent('dispatch:emsalertB', function(targetCoords)
         AddTextComponentString('10-13B Medic Down')
         EndTextCommandSetBlipName(policedown2)
         PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
-
         while alpha ~= 0 do
             Wait(120 * 4)
             alpha = alpha - 1
@@ -124,16 +126,16 @@ RegisterNetEvent('dispatch:emsalertB', function(targetCoords)
 end)
 
 
-local tenThirteenBC = false
-
-RegisterNetEvent('police:tenThirteenB', function()
+--[[
+    For Police 13B (Non Urgent)
+    To trigger this alert, use the following event
+    TriggerEvent("qb-dispatch:client:police13B")
+]]--
+RegisterNetEvent('qb-dispatch:client:police13B', function()
     if tenThirteenBC then return end;
-    
     if IsPoliceJob(PlayerJob.name) then
         local pos = GetEntityCoords(PlayerPedId(),  true)
-        
         local plyData = QBCore.Functions.GetPlayerData()
-        
         TriggerServerEvent("dispatch:svNotify", {
             dispatchCode = "10-13B",
             firstStreet = GetStreetAndZone(),
@@ -149,13 +151,11 @@ RegisterNetEvent('police:tenThirteenB', function()
             },
             job = {"police", "ambulance"}
         })
-
         CreateThread(function()
             tenThirteenBC = true
             Wait(30000)
             tenThirteenBC = false
         end)
-
         TriggerServerEvent('dispatch:policealertB', pos)
     end
 end)
@@ -164,7 +164,6 @@ RegisterNetEvent('dispatch:policealertB', function(targetCoords)
     if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and onDuty then	
         local alpha = 250
         local policedown2 = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
-
         SetBlipSprite(policedown2,  126)
         SetBlipColour(policedown2,  1)
         SetBlipScale(policedown2, 1.3)
@@ -187,13 +186,15 @@ RegisterNetEvent('dispatch:policealertB', function(targetCoords)
     end
 end)
 
-local tenThirteenAC = false
+--[[
+    For Police 13A (Urgent)
+    To trigger this alert, use the following event
+    TriggerEvent("qb-dispatch:client:police13A")
+]]--
 
-RegisterNetEvent('police:tenThirteenA', function()
+RegisterNetEvent('qb-dispatch:client:police13A', function()
     if tenThirteenAC then return end;
-    
     if IsPoliceJob(PlayerJob.name) then	
-        print("?????")
         local pos = GetEntityCoords(PlayerPedId(),  true)
         local plyData = QBCore.Functions.GetPlayerData()
 
@@ -211,9 +212,7 @@ RegisterNetEvent('police:tenThirteenA', function()
             },
             job = {"police","ambulance"}
         })
-        
         TriggerServerEvent('dispatch:policealertA', pos)
-        
         CreateThread(function()
             tenThirteenAC = true
             Wait(30000)
@@ -225,10 +224,8 @@ end)
 
 RegisterNetEvent('dispatch:policealertA', function(targetCoords)
     if (PlayerJob.name == 'ambulance' or IsPoliceJob(PlayerJob.name)) and onDuty then
-        print("??")	
         local alpha = 250
         local policedown = AddBlipForCoord(targetCoords.x, targetCoords.y, targetCoords.z)
-
         SetBlipSprite(policedown,  126)
         SetBlipColour(policedown,  1)
         SetBlipScale(policedown, 1.3)
@@ -237,7 +234,6 @@ RegisterNetEvent('dispatch:policealertA', function(targetCoords)
         AddTextComponentString('10-13A Officer Down')
         EndTextCommandSetBlipName(policedown)
         PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
-
         while alpha ~= 0 do
             Wait(120 * 4)
             alpha = alpha - 1

@@ -1,9 +1,13 @@
 local playAnim = false
 
+
+-- Item checks to return whether or not the client has a phone or not
 local function HasPhone()
     return QBCore.Functions.HasItem("phone")
 end
 
+
+-- Loads the animdict so we can execute it on the ped
 local function loadAnimDict(dict)
     RequestAnimDict(dict)
 
@@ -13,6 +17,7 @@ local function loadAnimDict(dict)
 end
 
 
+-- Does the actual animation of the animation when calling 911
 local function PhoneCallAnim()
     loadAnimDict("cellphone@")
     local ped = PlayerPedId()
@@ -27,6 +32,7 @@ local function PhoneCallAnim()
     end)
 end
 
+-- Regular 911 call that goes straight to the Police
 RegisterCommand('911', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
     if string.len(msg) > 0 then
@@ -64,6 +70,7 @@ RegisterCommand('911', function(source, args, rawCommand)
     end
 end)
 
+-- Anonymous 911 calls that goes straight to the Police
 RegisterCommand('911a', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
     if string.len(msg) > 0 then
@@ -99,6 +106,7 @@ RegisterCommand('911a', function(source, args, rawCommand)
     end
 end)
 
+-- Regular 311 call that goes straight to the Ambulance
 RegisterCommand('311', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
     if string.len(msg) > 0 then
@@ -136,6 +144,7 @@ RegisterCommand('311', function(source, args, rawCommand)
     end
 end)
 
+-- Anonymous 311 calls that goes straight to the Ambulance
 RegisterCommand('311a', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
     if string.len(msg) > 0 then
@@ -171,9 +180,9 @@ RegisterCommand('311a', function(source, args, rawCommand)
     end
 end)
 
------Test Commands----------
+-----Test Commands Remove after the script is in 1.0----------
 RegisterCommand("13A", function ()
-    TriggerEvent("ems:tenThirteenB")
+    TriggerEvent("qb-dispatch:client:police13A")
 end)
 
 RegisterCommand("bankrobbery", function ()

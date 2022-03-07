@@ -12,25 +12,24 @@ CreateThread(function()
 end)
 
 -- gunshots
-
 CreateThread(function() -- Gun Shots
     local isBusyGunShots, armed, cooldownGS, cooldownSMD = false, false, 0, 0
     while true do
         Wait(0)
-        if not isBusyGunShots and not (PlayerJob.name == 'bcso' or PlayerJob.name == 'police' or PlayerJob.name == 'parkranger') then
+        if not isBusyGunShots then
             armed = currentlyArmed
             if armed and Config.KnownWeapons[currentWeapon] then
                 if IsPedShooting(playerPed) and ((cooldownGS == 0) or cooldownGS - GetGameTimer() < 0) then
                     isBusyGunShots = true
                     if IsPedCurrentWeaponSilenced(playerPed) then
                         cooldownGS = GetGameTimer() + math.random(25000,30000) -- 20 => 25 Seconds.
-                        TriggerEvent("civilian:alertPolice", 15.0, "gunshot", 0, true, inHuntingZone, currentWeapon)
+                        TriggerEvent("civilian:alertPolice",15.0,"gunshot",0,true,inHuntingZone,currentWeapon)
                     elseif inVehicle then
                         cooldownGS = GetGameTimer() + math.random(20000,25000) -- 20 => 25 Seconds.
-                        TriggerEvent("civilian:alertPolice", 150.0, "gunshotvehicle", 0, true, inHuntingZone, currentWeapon)
+                        TriggerEvent("civilian:alertPolice",150.0,"gunshotvehicle",0,true,inHuntingZone,currentWeapon)
                     else
                         cooldownGS = GetGameTimer() + math.random(15000,20000) -- 15 => 20 Seconds.
-                        TriggerEvent("civilian:alertPolice", 550.0, "gunshot", 0, true, inHuntingZone, currentWeapon)
+                        TriggerEvent("civilian:alertPolice",550.0,"gunshot",0,true,inHuntingZone,currentWeapon)
                     end
                     isBusyGunShots = false
                 elseif (cooldownSMD == 0 and math.random(10) > 7) or ((cooldownSMD - GetGameTimer() < 0) and math.random(10) > 7) then
@@ -65,7 +64,6 @@ CreateThread(function() -- Gun Shots
 end)
 
 -- fights
-
 CreateThread(function() -- Fighting
     local isBusy, cooldown = false, 0
     while true do 

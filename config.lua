@@ -84,11 +84,11 @@ Config.NulledAreas = {
 
 Config.HuntingZones = {
     {
-        name = "huntingZone",
-        minZ = -50.0,
-        maxZ = 750.0,
-        debugGrid = false,
-        gridDivisions = 25,
+        name="huntingZone",
+        minZ=-50.0,
+        maxZ=750.0,
+        debugGrid=false,
+        gridDivisions=25,
         area = {
             vector2(-1416.86, 2730.74),
             vector2(-2415.01, 3701.34),

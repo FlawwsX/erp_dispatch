@@ -6,6 +6,7 @@ RegisterCommand("dtest", function ()
         sprite = 310,
         color = 1,
         scale = 0.7,
+        name = "Custom Alert",
         blipTick = 2000,
         alpha = 250,
         coords = coords,
@@ -117,19 +118,12 @@ RegisterNetEvent('dispatch:manageNotifs', function(sentSetting)
     end
 end)
 
-RegisterNetEvent('alert:noPedCheck', function(alertType)
-    if alertType == "banktruck" then
-        AlertBankTruck()
-    elseif alertType == "yacht" then
-        AlertYacht()
-    elseif alertType == "art" then
-        AlertArt()
-    end
-end)
-
-RegisterNetEvent('civilian:alertPolice', function(basedistance, alertType, objPassed, isGunshot, isHunting, sentWeapon)
+--[[
+    All the functions triggered in the next event are present in cl_basealerts.lua
+]]--
+RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPassed,isGunshot,isHunting,sentWeapon)
     if PlayerJob == nil then return end
-    local friendlyType
+
     local isPolice = IsPoliceJob(PlayerJob.name)
     local object = objPassed
 
@@ -146,7 +140,7 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance, alertType, objPa
     local plyCoords = GetEntityCoords(PlayerPedId())
 
     if isGunshot then
-        friendlyType = 'gunshot'
+        shittypefuckyou = 'gunshot'
     end
 
     local nearNPC
@@ -154,8 +148,8 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance, alertType, objPa
     if alertType == 'drugsale' then
         nearNPC = GetClosestNPC(plyCoords, basedistance, 'combat', object)
     else
-        nearNPC = GetClosestNPC(plyCoords, basedistance, friendlyType)
-    end
+        nearNPC = GetClosestNPC(plyCoords, basedistance, shittypefuckyou)
+    end 
 
     local dst = 0
 
@@ -167,7 +161,7 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance, alertType, objPa
         if not isSpeeder and alertType ~= "robberyhouse" then
             Wait(500)
             if GetEntityHealth(nearNPC) == 0 then
-            return
+                return
             end
             if not DoesEntityExist(nearNPC) then
                 return
@@ -196,35 +190,17 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance, alertType, objPa
     local isUnderground = false
     if plyCoords.z <= -25 then isUnderground = true end
 
-    if alertType == "drugsale" and not isUnderground and not isPolice then -- Not used yet
+    if alertType == "drugsale" and not underground --[[and not isPolice]] then
         if dst > 50.5 and dst < 75.0 then
             DrugSale()
         end
-
-    elseif alertType == "druguse" and not isUnderground and not isPolice then -- Not used yet
-        if dst > 12.0 and dst < 18.0 then
-            --DrugUse() 
-        end
-
-    elseif alertType == "carcrash" then -- Not used yet
+    elseif alertType == "carcrash" then
         CarCrash()
-
-    elseif alertType == "death" then -- Not used yet
-        -- AlertDeath()  
-        local roadtest2 = IsPointOnRoad(GetEntityCoords(PlayerPedId()), PlayerPedId())
-        if roadtest2 then return end
-        BringNpcs()
-
-    elseif alertType == "Suspicious" then -- Not used yet
-        --AlertSuspicious() 
-
-    elseif alertType == "fight" and not isUnderground then
+    elseif alertType == "fight" and not underground then
         AlertFight()
-
     elseif (alertType == "gunshot" or alertType == "gunshotvehicle") then
         AlertGunShot(isHunting, sentWeapon)
-
-    elseif alertType == "lockpick" then -- Not used yet
+    elseif alertType == "lockpick" then
         if dst > 5.0 and dst < 85.0 then
             if math.random(100) >= 25 then
                 AlertCheckLockpick(object)
@@ -232,6 +208,10 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance, alertType, objPa
         end
     end
 end)
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--makes the AI move towards player
 
 RegisterNetEvent('TriggerAIRunning', function(p)
     local usingped = p

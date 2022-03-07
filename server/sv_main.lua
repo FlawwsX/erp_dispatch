@@ -34,8 +34,8 @@ RegisterServerEvent('dispatch:customAlert', function(data)
     end
 end)
 
-function GetDispatchCalls() return calls end
-exports('GetDispatchCalls', GetDispatchCalls) -- exports['erp_dispatch']:GetDispatchCalls()
+local function GetDispatchCalls() return calls end
+exports('GetDispatchCalls', GetDispatchCalls) -- exports['qb-mdt']:GetDispatchCalls()
 
 -- this is mdt call
 AddEventHandler("dispatch:addUnit", function(callid, player, cb)
@@ -49,11 +49,12 @@ AddEventHandler("dispatch:addUnit", function(callid, player, cb)
             end
         end
 
-        if IsPoliceJob(PlayerJob.name) then
-            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'Police', callsign = player.callsign })
-        elseif PlayerJob.name == 'ambulance' then
-            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'EMS', callsign = player.callsign })
+        if IsPoliceJob(player.job.name) then
+            calls[callid]['units'][#calls[callid]['units']+1] = { cid = player.cid, fullname = player.fullname, job = 'Police', callsign = player.callsign } -- Adds units to individual calls within the MDT for Police
+        elseif player.job.name == 'ambulance' then
+            calls[callid]['units'][#calls[callid]['units']+1] = { cid = player.cid, fullname = player.fullname, job = 'EMS', callsign = player.callsign } -- Adds units to individual calls within the MDT for EMS
         end
+
         cb(#calls[callid]['units'])
     end
 end)
@@ -64,7 +65,7 @@ AddEventHandler("dispatch:removeUnit", function(callid, player, cb)
         if #calls[callid]['units'] > 0 then
             for i=1, #calls[callid]['units'] do
                 if calls[callid]['units'][i]['cid'] == player.cid then
-                    table.remove(calls[callid]['units'], i)
+                    calls[callid]['units'][i] = nil -- Remove units from calls
                 end
             end
         end
@@ -76,11 +77,11 @@ AddEventHandler("dispatch:sendCallResponse", function(player, callid, message, t
     local Player = QBCore.Functions.GetPlayer(player)
     local name = Player.PlayerData.charinfo.firstname.. " " ..Player.PlayerData.charinfo.lastname
     if calls[callid] then
-        table.insert(calls[callid]['responses'], {
+        calls[callid]['responses'][#calls[callid]['responses']+1] = {
             name = name,
             message = message,
             time = time
-        })
+        }
         local player = calls[callid]['source']
         if GetPlayerPing(player) > 0 then
             TriggerClientEvent('dispatch:getCallResponse', player, message)
@@ -88,7 +89,7 @@ AddEventHandler("dispatch:sendCallResponse", function(player, callid, message, t
         cb(true)
     else
         cb(false)
-    end    
+    end
 end)
 
 RegisterCommand('togglealerts', function(source, args, user)

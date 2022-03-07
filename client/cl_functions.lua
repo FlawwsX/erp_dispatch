@@ -2,114 +2,6 @@
     These are all helper functions used. I would advise not touching any of the code here unless you know what you are doing!
 ]]--
 
-
--- Made this localized since its only used in this file
--- function to get the direction name based on heading of player
-local function getCardinalDirectionFromHeading()
-    local heading = GetEntityHeading(PlayerPedId())
-    if heading >= 315 or heading < 45 then return "North Bound"
-    elseif heading >= 45 and heading < 135 then return "West Bound"
-    elseif heading >=135 and heading < 225 then return "South Bound"
-    elseif heading >= 225 and heading < 315 then return "East Bound" end
-end
-
--- This event is called when an alert goes off, it determines the closest peds near the player and whether they should start running towards the scene of crime or not to make it more realistic.
-local function canPedBeUsed(ped,isGunshot,isSpeeder)
-    if math.random(100) > 15 then
-        return false
-    end
-
-    if ped == nil then
-        return false
-    end
-
-    if isSpeeder == nil then
-        isSpeeder = false
-    end
-
-    if ped == PlayerPedId() then
-        return false
-    end
-
-    if GetEntityHealth(ped) == 0 then
-        return false
-    end
-
-    if isSpeeder then
-        if not IsPedInAnyVehicle(ped, false) then
-            return false
-        end
-    end
-
-    if `mp_f_deadhooker` == GetEntityModel(ped) then
-        return false
-    end
-
-    local curcoords = GetEntityCoords(PlayerPedId())
-    local startcoords = GetEntityCoords(ped)
-
-    if #(curcoords - startcoords) < 10.0 then
-        return false
-    end    
-
-    -- here we add areas that peds can not alert the police
-    if #(curcoords - vector3( 1088.76, -3187.51, -38.99)) < 15.0 then
-        return false
-    end  
-
-    if not HasEntityClearLosToEntity(PlayerPedId(), ped, 17) and not isGunshot then
-        return false
-    end
-
-    if not DoesEntityExist(ped) then
-        return false
-    end
-
-    if IsPedAPlayer(ped) then
-        return false
-    end
-
-    if IsPedFatallyInjured(ped) then
-        return false
-    end
-    
-    if IsPedArmed(ped, 7) then
-        return false
-    end
-
-    if IsPedInMeleeCombat(ped) then
-        return false
-    end
-
-    if IsPedShooting(ped) then
-        return false
-    end
-
-    if IsPedDucking(ped) then
-        return false
-    end
-
-    if IsPedBeingJacked(ped) then
-        return false
-    end
-
-    if IsPedSwimming(ped) then
-        return false
-    end
-
-    if IsPedJumpingOutOfVehicle(ped) or IsPedBeingJacked(ped) then
-        return false
-    end
-
-    local pedType = GetPedType(ped)
-    if pedType == 6 or pedType == 27 or pedType == 29 or pedType == 28 then
-        return false
-    end
-    return true
-end
-
-
-
 -- function for police job check
 function IsPoliceJob(job)
     for k, v in pairs(Config.PoliceJob) do
@@ -125,6 +17,15 @@ function GetPedGender()
     local gender = "Male"
     if QBCore.Functions.GetPlayerData().charinfo.gender == 1 then gender = "Female" end
     return gender
+end
+
+-- function to get the direction name based on heading of player
+function getCardinalDirectionFromHeading()
+    local heading = GetEntityHeading(PlayerPedId())
+    if heading >= 315 or heading < 45 then return "North Bound"
+    elseif heading >= 45 and heading < 135 then return "West Bound"
+    elseif heading >=135 and heading < 225 then return "South Bound"
+    elseif heading >= 225 and heading < 315 then return "East Bound" end
 end
 
 -- function to return street name and Zone
@@ -218,9 +119,9 @@ function GetVehicleDescription(sentVehicle)
     elseif sentVehicle then
         currentVehicle = sentVehicle
     end
-    local plate = GetVehicleNumberPlateText(currentVehicle)
-    local make = GetDisplayNameFromVehicleModel(GetEntityModel(currentVehicle))
-    local color1, color2 = GetVehicleColours(currentVehicle)
+    plate = GetVehicleNumberPlateText(currentVehicle)
+    make = GetDisplayNameFromVehicleModel(GetEntityModel(currentVehicle))
+    color1, color2 = GetVehicleColours(currentVehicle)
     if color1 == 0 then color1 = 1 end
     if color2 == 0 then color2 = 2 end
     if color1 == -1 then color1 = 158 end
@@ -234,6 +135,101 @@ function GetVehicleDescription(sentVehicle)
         heading = dir
     }
     return vehicleData
+end
+
+-- This event is called when an alert goes off, it determines the closest peds near the player and whether they should start running towards the scene of crime or not to make it more realistic.
+function canPedBeUsed(ped,isGunshot,isSpeeder)
+    if math.random(100) > 15 then
+        return false
+    end
+
+    if ped == nil then
+        return false
+    end
+
+    if isSpeeder == nil then
+        isSpeeder = false
+    end
+
+    if ped == PlayerPedId() then
+        return false
+    end
+
+    if GetEntityHealth(ped) == 0 then
+        return false
+    end
+
+    if isSpeeder then
+        if not IsPedInAnyVehicle(ped, false) then
+            return false
+        end
+    end
+
+    if `mp_f_deadhooker` == GetEntityModel(ped) then
+        return false
+    end
+
+    local curcoords = GetEntityCoords(PlayerPedId())
+    local startcoords = GetEntityCoords(ped)
+
+    if #(curcoords - startcoords) < 10.0 then
+        return false
+    end    
+
+    -- here we add areas that peds can not alert the police
+    if #(curcoords - vector3( 1088.76, -3187.51, -38.99)) < 15.0 then
+        return false
+    end  
+
+    if not HasEntityClearLosToEntity(PlayerPedId(), ped, 17) and not isGunshot then
+        return false
+    end
+
+    if not DoesEntityExist(ped) then
+        return false
+    end
+
+    if IsPedAPlayer(ped) then
+        return false
+    end
+
+    if IsPedFatallyInjured(ped) then
+        return false
+    end
+    
+    if IsPedArmed(ped, 7) then
+        return false
+    end
+
+    if IsPedInMeleeCombat(ped) then
+        return false
+    end
+
+    if IsPedShooting(ped) then
+        return false
+    end
+
+    if IsPedDucking(ped) then
+        return false
+    end
+
+    if IsPedBeingJacked(ped) then
+        return false
+    end
+
+    if IsPedSwimming(ped) then
+        return false
+    end
+
+    if IsPedJumpingOutOfVehicle(ped) or IsPedBeingJacked(ped) then
+        return false
+    end
+
+    local pedType = GetPedType(ped)
+    if pedType == 6 or pedType == 27 or pedType == 29 or pedType == 28 then
+        return false
+    end
+    return true
 end
 
 -- basic reset function
@@ -271,6 +267,8 @@ function BringNpcs()
     local playerCoords = GetEntityCoords(PlayerPedId())
     local handle, ped = FindFirstPed()
     local success
+    local rped = nil
+    local distanceFrom
     repeat
         local pos = GetEntityCoords(ped)
         local distance = #(playerCoords - pos)
