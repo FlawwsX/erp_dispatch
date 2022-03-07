@@ -6,7 +6,6 @@ RegisterCommand("dtest", function ()
         sprite = 310,
         color = 1,
         scale = 0.7,
-        name = "Custom Alert",
         blipTick = 2000,
         alpha = 250,
         coords = coords,
@@ -118,12 +117,19 @@ RegisterNetEvent('dispatch:manageNotifs', function(sentSetting)
     end
 end)
 
---[[
-    All the functions triggered in the next event are present in cl_basealerts.lua
-]]--
-RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPassed,isGunshot,isHunting,sentWeapon)
-    if PlayerJob == nil then return end
+RegisterNetEvent('alert:noPedCheck', function(alertType)
+    if alertType == "banktruck" then
+        AlertBankTruck()
+    elseif alertType == "yacht" then
+        AlertYacht()
+    elseif alertType == "art" then
+        AlertArt()
+    end
+end)
 
+RegisterNetEvent('civilian:alertPolice', function(basedistance, alertType, objPassed, isGunshot, isHunting, sentWeapon)
+    if PlayerJob == nil then return end
+    local friendlyType
     local isPolice = IsPoliceJob(PlayerJob.name)
     local object = objPassed
 
@@ -140,7 +146,7 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
     local plyCoords = GetEntityCoords(PlayerPedId())
 
     if isGunshot then
-        shittypefuckyou = 'gunshot'
+        friendlyType = 'gunshot'
     end
 
     local nearNPC
@@ -148,8 +154,8 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
     if alertType == 'drugsale' then
         nearNPC = GetClosestNPC(plyCoords, basedistance, 'combat', object)
     else
-        nearNPC = GetClosestNPC(plyCoords, basedistance, shittypefuckyou)
-    end 
+        nearNPC = GetClosestNPC(plyCoords, basedistance, friendlyType)
+    end
 
     local dst = 0
 
@@ -190,17 +196,35 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
     local isUnderground = false
     if plyCoords.z <= -25 then isUnderground = true end
 
-    if alertType == "drugsale" and not underground --[[and not isPolice]] then
+    if alertType == "drugsale" and not isUnderground and not isPolice then -- Not used yet
         if dst > 50.5 and dst < 75.0 then
             DrugSale()
         end
-    elseif alertType == "carcrash" then
+
+    elseif alertType == "druguse" and not isUnderground and not isPolice then -- Not used yet
+        if dst > 12.0 and dst < 18.0 then
+            --DrugUse() 
+        end
+
+    elseif alertType == "carcrash" then -- Not used yet
         CarCrash()
-    elseif alertType == "fight" and not underground then
+
+    elseif alertType == "death" then -- Not used yet
+        -- AlertDeath()  
+        local roadtest2 = IsPointOnRoad(GetEntityCoords(PlayerPedId()), PlayerPedId())
+        if roadtest2 then return end
+        BringNpcs()
+
+    elseif alertType == "Suspicious" then -- Not used yet
+        --AlertSuspicious() 
+
+    elseif alertType == "fight" and not isUnderground then
         AlertFight()
+
     elseif (alertType == "gunshot" or alertType == "gunshotvehicle") then
         AlertGunShot(isHunting, sentWeapon)
-    elseif alertType == "lockpick" then
+
+    elseif alertType == "lockpick" then -- Not used yet
         if dst > 5.0 and dst < 85.0 then
             if math.random(100) >= 25 then
                 AlertCheckLockpick(object)
@@ -208,10 +232,6 @@ RegisterNetEvent('civilian:alertPolice', function(basedistance,alertType,objPass
         end
     end
 end)
-
-
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---makes the AI move towards player
 
 RegisterNetEvent('TriggerAIRunning', function(p)
     local usingped = p
@@ -233,12 +253,12 @@ RegisterNetEvent('TriggerAIRunning', function(p)
     while dist > 3.5 and (imdead == 1 or imcollapsed == 1) do
         TaskGoStraightToCoord(usingped, moveto, 2.5, -1, 0.0, 0.0)
         dist = #(moveto - GetEntityCoords(usingped))
-        Citizen.Wait(100)
+        Wait(100)
     end
     ClearPedTasksImmediately(ped)
     TaskLookAtEntity(usingped, PlayerPedId(), 5500.0, 2048, 3)
     TaskTurnPedToFaceEntity(usingped, PlayerPedId(), 5500)
-    Citizen.Wait(3000)
+    Wait(3000)
     if math.random(3) == 2 then
         TaskStartScenarioInPlace(usingped, Config.TasksIdle[2], 0, 1)
     elseif math.random(1, 2) == 1 then
@@ -249,12 +269,12 @@ RegisterNetEvent('TriggerAIRunning', function(p)
     end
     SetPedKeepTask(usingped, true) 
     while imdead == 1 or imcollapsed == 1 do
-        Citizen.Wait(1)
+        Wait(1)
         if not IsPedFacingPed(usingped, PlayerPedId(), 15.0) then
             ClearPedTasksImmediately(ped)
             TaskLookAtEntity(usingped, PlayerPedId(), 5500.0, 2048, 3)
             TaskTurnPedToFaceEntity(usingped, PlayerPedId(), 5500)
-            Citizen.Wait(3000)
+            Wait(3000)
         end
     end
     SetEntityAsNoLongerNeeded(usingped)

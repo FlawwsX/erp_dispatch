@@ -49,9 +49,9 @@ AddEventHandler("dispatch:addUnit", function(callid, player, cb)
             end
         end
 
-        if IsPoliceJob(player.job.name) then
+        if IsPoliceJob(PlayerJob.name) then
             table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'Police', callsign = player.callsign })
-        elseif player.job.name == 'ambulance' then
+        elseif PlayerJob.name == 'ambulance' then
             table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'EMS', callsign = player.callsign })
         end
         cb(#calls[callid]['units'])

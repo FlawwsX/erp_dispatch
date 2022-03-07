@@ -2,25 +2,10 @@
     These are all helper functions used. I would advise not touching any of the code here unless you know what you are doing!
 ]]--
 
--- function for police job check
-function IsPoliceJob(job)
-    for k, v in pairs(Config.PoliceJob) do
-        if job == v then
-            return true
-        end
-    end
-    return false
-end
 
--- function for gender check (male or female)
-function GetPedGender()
-    local gender = "Male"
-    if QBCore.Functions.GetPlayerData().charinfo.gender == 1 then gender = "Female" end
-    return gender
-end
-
+-- Made this localized since its only used in this file
 -- function to get the direction name based on heading of player
-function getCardinalDirectionFromHeading()
+local function getCardinalDirectionFromHeading()
     local heading = GetEntityHeading(PlayerPedId())
     if heading >= 315 or heading < 45 then return "North Bound"
     elseif heading >= 45 and heading < 135 then return "West Bound"
@@ -28,117 +13,8 @@ function getCardinalDirectionFromHeading()
     elseif heading >= 225 and heading < 315 then return "East Bound" end
 end
 
--- function to return street name and Zone
-function GetStreetAndZone()
-    local coords = GetEntityCoords(PlayerPedId())
-    local currentStreetHash, intersectStreetHash = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
-    local currentStreetName = GetStreetNameFromHashKey(currentStreetHash)
-    local area = GetLabelText(tostring(GetNameOfZone(coords.x, coords.y, coords.z)))
-    local playerStreetsLocation = area
-    if not zone then zone = "UNKNOWN" end
-    if currentStreetName ~= nil and currentStreetName ~= "" then playerStreetsLocation = currentStreetName .. ", " ..area
-    else playerStreetsLocation = area end
-    return playerStreetsLocation
-end
-
--- Function that return makes the ped make a phone call of nearby illegal activity like gunshot, fights, etc.
--- Ped will do a phone animation to make it more realistic
-function GetClosestNPC(sentPos, sentDistance, sentType, sentIgnoredPed)
-    if sentType == 'combat' then
-        local allPeds = GetGamePool('CPed')
-        for i=1, #allPeds do
-            local ped = allPeds[i]
-            if DoesEntityExist(ped) then
-                if ped ~= sentIgnoredPed then
-                    local dist = #(GetEntityCoords(ped) - sentPos)
-                    if dist < sentDistance then
-                        return ped
-                    end
-                end 
-            end
-        end
-    elseif sentType == 'gunshot' then
-        local allPeds = GetGamePool('CPed')
-        for i=1, #allPeds do
-            local ped = allPeds[i]
-            if DoesEntityExist(ped) then
-                local dist = #(GetEntityCoords(ped) - sentPos)
-                if dist < sentDistance then
-                    if (GetPedAlertness(ped) > 0) and not IsPedAimingFromCover(ped) and not IsPedBeingStunned(ped, 0) and not IsPedDeadOrDying(ped, 1) and IsPedHuman(ped) and not IsPedInAnyPlane(ped) and not IsPedInAnyHeli(ped) and not IsPedShooting(ped) and not IsPedAPlayer(ped) then
-                        TaskUseMobilePhoneTimed(ped, 5000)
-                        return ped
-                    end
-                end
-            end
-        end
-    elseif sentType == 'armed' then
-        local allPeds = GetGamePool('CPed')
-        for i=1, #allPeds do
-            local ped = allPeds[i]
-            if DoesEntityExist(ped) and not IsPedAPlayer(ped) then
-                local dist = #(GetEntityCoords(ped) - sentPos)
-                if dist < 50.0 and math.random(10) > 4 then
-                    if not IsPedAimingFromCover(ped) and not IsPedBeingStunned(ped, 0) and not IsPedDeadOrDying(ped, 1) and IsPedHuman(ped) and not IsPedInAnyPlane(ped) and not IsPedInAnyHeli(ped) and not IsPedShooting(ped) then
-                        TaskUseMobilePhoneTimed(ped, 5000)
-                        return ped
-                    end
-                end
-            end
-        end
-    else
-        local allPeds = GetGamePool('CPed')
-        for i=1, #allPeds do
-            local ped = allPeds[i]
-            if DoesEntityExist(ped) and not IsPedAPlayer(ped) then
-                local dist = #(GetEntityCoords(ped) - sentPos)
-                if dist < sentDistance then
-                    return ped
-                end
-            end
-        end
-    end
-end
-
--- Returns the ped in front of player
-function GetPedInFront()	
-	local plyPed = PlayerPedId()
-	local plyPos = GetEntityCoords(plyPed, false)
-	local plyOffset = GetOffsetFromEntityInWorldCoords(plyPed, 0.0, 1.3, 0.0)
-	local rayHandle = StartShapeTestCapsule(plyPos.x, plyPos.y, plyPos.z, plyOffset.x, plyOffset.y, plyOffset.z, 1.0, 12, plyPed, 7)
-	local _, _, _, _, ped = GetShapeTestResult(rayHandle)
-	return ped
-end
-
--- Return vehicle related information like color, plate, make 
-function GetVehicleDescription(sentVehicle)
-    if not sentVehicle or sentVehicle == nil then
-        local currentVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-        if not DoesEntityExist(currentVehicle) then
-            return
-        end
-    elseif sentVehicle then
-        currentVehicle = sentVehicle
-    end
-    plate = GetVehicleNumberPlateText(currentVehicle)
-    make = GetDisplayNameFromVehicleModel(GetEntityModel(currentVehicle))
-    color1, color2 = GetVehicleColours(currentVehicle)
-    if color1 == 0 then color1 = 1 end
-    if color2 == 0 then color2 = 2 end
-    if color1 == -1 then color1 = 158 end
-    if color2 == -1 then color2 = 158 end 
-    local dir = getCardinalDirectionFromHeading()
-    local vehicleData  = {
-        model = make,
-        plate = plate,
-        firstColor = Config.VehicleColors[color1],
-        secondColor = Config.VehicleColors[color2],
-        heading = dir
-    }
-    return vehicleData
-end
-
 -- This event is called when an alert goes off, it determines the closest peds near the player and whether they should start running towards the scene of crime or not to make it more realistic.
-function canPedBeUsed(ped,isGunshot,isSpeeder)
+local function canPedBeUsed(ped,isGunshot,isSpeeder)
     if math.random(100) > 15 then
         return false
     end
@@ -232,6 +108,134 @@ function canPedBeUsed(ped,isGunshot,isSpeeder)
     return true
 end
 
+
+
+-- function for police job check
+function IsPoliceJob(job)
+    for k, v in pairs(Config.PoliceJob) do
+        if job == v then
+            return true
+        end
+    end
+    return false
+end
+
+-- function for gender check (male or female)
+function GetPedGender()
+    local gender = "Male"
+    if QBCore.Functions.GetPlayerData().charinfo.gender == 1 then gender = "Female" end
+    return gender
+end
+
+-- function to return street name and Zone
+function GetStreetAndZone()
+    local coords = GetEntityCoords(PlayerPedId())
+    local currentStreetHash, intersectStreetHash = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
+    local currentStreetName = GetStreetNameFromHashKey(currentStreetHash)
+    local area = GetLabelText(tostring(GetNameOfZone(coords.x, coords.y, coords.z)))
+    local playerStreetsLocation = area
+    if not zone then zone = "UNKNOWN" end
+    if currentStreetName ~= nil and currentStreetName ~= "" then playerStreetsLocation = currentStreetName .. ", " ..area
+    else playerStreetsLocation = area end
+    return playerStreetsLocation
+end
+
+-- Function that return makes the ped make a phone call of nearby illegal activity like gunshot, fights, etc.
+-- Ped will do a phone animation to make it more realistic
+function GetClosestNPC(sentPos, sentDistance, sentType, sentIgnoredPed)
+    if sentType == 'combat' then
+        local allPeds = GetGamePool('CPed')
+        for i=1, #allPeds do
+            local ped = allPeds[i]
+            if DoesEntityExist(ped) then
+                if ped ~= sentIgnoredPed then
+                    local dist = #(GetEntityCoords(ped) - sentPos)
+                    if dist < sentDistance then
+                        return ped
+                    end
+                end 
+            end
+        end
+    elseif sentType == 'gunshot' then
+        local allPeds = GetGamePool('CPed')
+        for i=1, #allPeds do
+            local ped = allPeds[i]
+            if DoesEntityExist(ped) then
+                local dist = #(GetEntityCoords(ped) - sentPos)
+                if dist < sentDistance then
+                    if (GetPedAlertness(ped) > 0) and not IsPedAimingFromCover(ped) and not IsPedBeingStunned(ped, 0) and not IsPedDeadOrDying(ped, 1) and IsPedHuman(ped) and not IsPedInAnyPlane(ped) and not IsPedInAnyHeli(ped) and not IsPedShooting(ped) and not IsPedAPlayer(ped) then
+                        TaskUseMobilePhoneTimed(ped, 5000)
+                        return ped
+                    end
+                end
+            end
+        end
+    elseif sentType == 'armed' then
+        local allPeds = GetGamePool('CPed')
+        for i=1, #allPeds do
+            local ped = allPeds[i]
+            if DoesEntityExist(ped) and not IsPedAPlayer(ped) then
+                local dist = #(GetEntityCoords(ped) - sentPos)
+                if dist < 50.0 and math.random(10) > 4 then
+                    if not IsPedAimingFromCover(ped) and not IsPedBeingStunned(ped, 0) and not IsPedDeadOrDying(ped, 1) and IsPedHuman(ped) and not IsPedInAnyPlane(ped) and not IsPedInAnyHeli(ped) and not IsPedShooting(ped) then
+                        TaskUseMobilePhoneTimed(ped, 5000)
+                        return ped
+                    end
+                end
+            end
+        end
+    else
+        local allPeds = GetGamePool('CPed')
+        for i=1, #allPeds do
+            local ped = allPeds[i]
+            if DoesEntityExist(ped) and not IsPedAPlayer(ped) then
+                local dist = #(GetEntityCoords(ped) - sentPos)
+                if dist < sentDistance then
+                    return ped
+                end
+            end
+        end
+    end
+end
+
+-- Returns the ped in front of player
+function GetPedInFront()	
+	local plyPed = PlayerPedId()
+	local plyPos = GetEntityCoords(plyPed, false)
+	local plyOffset = GetOffsetFromEntityInWorldCoords(plyPed, 0.0, 1.3, 0.0)
+	local rayHandle = StartShapeTestCapsule(plyPos.x, plyPos.y, plyPos.z, plyOffset.x, plyOffset.y, plyOffset.z, 1.0, 12, plyPed, 7)
+	local _, _, _, _, ped = GetShapeTestResult(rayHandle)
+	return ped
+end
+
+-- Return vehicle related information like color, plate, make 
+function GetVehicleDescription(sentVehicle)
+    if not sentVehicle or sentVehicle == nil then
+        local currentVehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+        if not DoesEntityExist(currentVehicle) then
+            return
+        end
+    elseif sentVehicle then
+        currentVehicle = sentVehicle
+    end
+    local plate = GetVehicleNumberPlateText(currentVehicle)
+    local make = GetDisplayNameFromVehicleModel(GetEntityModel(currentVehicle))
+    local color1, color2 = GetVehicleColours(currentVehicle)
+    if color1 == 0 then color1 = 1 end
+    if color2 == 0 then color2 = 2 end
+    if color1 == -1 then color1 = 158 end
+    if color2 == -1 then color2 = 158 end 
+    local dir = getCardinalDirectionFromHeading()
+    local vehicleData  = {
+        model = make,
+        plate = plate,
+        firstColor = Config.VehicleColors[color1],
+        secondColor = Config.VehicleColors[color2],
+        heading = dir
+    }
+    return vehicleData
+end
+
 -- basic reset function
 function ResetMathRandom()
     math.randomseed(GetCloudTimeAsInt())
@@ -267,8 +271,6 @@ function BringNpcs()
     local playerCoords = GetEntityCoords(PlayerPedId())
     local handle, ped = FindFirstPed()
     local success
-    local rped = nil
-    local distanceFrom
     repeat
         local pos = GetEntityCoords(ped)
         local distance = #(playerCoords - pos)

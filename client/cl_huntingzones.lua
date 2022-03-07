@@ -1,3 +1,5 @@
+local HuntingZones = {}
+inHuntingZone = false
 
 function generateHuntingZones()
     for zone, data in pairs(Config.HuntingZones) do 
@@ -16,8 +18,8 @@ function generateHuntingZones()
 end
 
 function removeHuntingZones()
-    for zone, data in pairs(HuntingZones) do 
-        HuntingZones[zone]:destroy()
+    for k, v in pairs(HuntingZones) do
+        HuntingZones[k]:destroy()
     end
     HuntingZones = {}
 end
