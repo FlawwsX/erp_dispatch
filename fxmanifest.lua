@@ -2,14 +2,23 @@ fx_version 'cerulean'
 game 'gta5'
 
 author 'Flawws & Flakey'
-description 'This is the EchoRP Dispatch System'
+description 'qb-dispatch edited to suit QBCore by Project Sloth, originally created by Flawws & Flakey for their EchoRP server.'
 version '1.0.0'
 
 lua54 'yes'
 
-client_script '@PolyZone/client.lua'
-server_script 'sv_main.lua'
-client_script 'cl_main.lua'
+shared_script{
+    "config.lua"
+}
+
+client_scripts{
+    '@PolyZone/client.lua',
+    'client/*.lua',
+}
+
+server_scripts{
+    'server/*.lua',
+}
 
 ui_page 'ui/index.html'
 
