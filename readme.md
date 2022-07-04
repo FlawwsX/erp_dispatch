@@ -1,1 +1,1 @@
-Matching MDT: https://github.com/FlawwsX/erp_mdt
+Matching MDT: https://github.com/stuxxyofficial/mdt

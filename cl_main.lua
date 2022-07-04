@@ -23,9 +23,20 @@ huntingZone:onPlayerInOut(function(isPointInside, point)
     inHuntingZone = isPointInside
 end)
 
+
+ESX = nil
+
+Citizen.CreateThread(function()
+    while ESX == nil do
+        TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+        Citizen.Wait(0)
+    end
+end)
+
+
 CreateThread(function() -- Use this only if you think/plan on restarting the resource often.
     while PlayerData['cid'] == nil do
-      PlayerData = exports['echorp']:GetPlayerData()
+      PlayerData = ESX.GetPlayerData()
       Wait(5000)
     end
     return
@@ -608,7 +619,7 @@ function ArmedPlayer() -- When aiming weapon.
         z = currentPos.z
         },
         dispatchMessage = "Brandishing",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
 end
@@ -682,7 +693,7 @@ end)
 RegisterNetEvent('erp-dispatch:combatAlert')
 AddEventHandler('erp-dispatch:combatAlert', function(sentCoords)
     if sentCoords then
-        if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then
+        if (ESX.GetPlayerData().job.name == 'police') and ESX.GetPlayerData().job.duty == 1 then
             local alpha = 250
             local combatBlip = AddBlipForCoord(sentCoords)
 
@@ -718,7 +729,7 @@ RegisterNetEvent('erp-dispatch:armedperson')
 AddEventHandler('erp-dispatch:armedperson', function(sentCoords)
     if sentCoords then
         
-        if (PlayerData.job.isPolice) and PlayerData.job.duty == 1 then 
+        if (ESX.GetPlayerData().job.name == 'police') and ESX.GetPlayerData().job.duty == 1 then
             local alpha = 250
             local armedperson = AddBlipForCoord(sentCoords)
 
@@ -807,8 +818,12 @@ end)
 
 RegisterNetEvent('civilian:alertPolice')
 AddEventHandler("civilian:alertPolice",function(basedistance,alertType,objPassed,isGunshot,isHunting,sentWeapon)
-    if PlayerData.job == nil then return end;
-    local isPolice = PlayerData.job.isPolice
+    if ESX.GetPlayerData().job == nil then return end;
+    if (ESX.GetPlayerData().job.name == 'police') then
+    local isPolice = true
+    else
+    local isPolice = false
+    end
 
     local object = objPassed
 
@@ -1042,7 +1057,7 @@ function AlertFight()
         dispatchMessage = "Disturbance",
         blipSprite = 458,
         blipColor = 25,
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     TriggerServerEvent('erp-dispatch:combatAlert', currentPos)
@@ -1071,7 +1086,7 @@ function AlertFight()
                     z = newPos.z
                     },
                     dispatchMessage = "Car fleeing 10-15",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:combatAlert', newPos)
             end
@@ -1094,7 +1109,7 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
 
         TriggerServerEvent('erp-dispatch:gunshotAlert', currentPos, isAuto, PlayerData.job.isPolice)
 
-        local job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        local job = {"police","bcso","pa","sast","sapr","sasp","doc"}
         --if isHunting then job = {"sapr"} end
 
         TriggerServerEvent('dispatch:svNotify', {
@@ -1141,7 +1156,7 @@ function AlertGunShot(isHunting, sentWeapon) -- Check for automatic, change prio
                         z = newPos.z
                         },
                         dispatchMessage = "Car fleeing 10-60",
-                        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                     })
                     TriggerServerEvent('erp-dispatch:gunshotAlert', newPos, false, PlayerData.job.isPolice)
                 end
@@ -1159,13 +1174,13 @@ end)
 RegisterCommand('911', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
     if string.len(msg) > 0 then
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = ESX.GetPlayerData()
         local locationInfo = GetStreetAndZone()
         local gender = IsPedMale(playerPed)
         local currentPos = GetEntityCoords(playerPed)
 
         TriggerEvent('dp:playEmote', "phone")
-		local rfl = exports['erp_progressbar']:taskBar(math.random(2500, 4000), "Dialing 911")
+		local rfl = 100
         TriggerEvent('dp:cancelEmote')
         if rfl == 100 then
             TriggerServerEvent('dispatch:svNotify', {
@@ -1177,7 +1192,7 @@ RegisterCommand('911', function(source, args, rawCommand)
                 dispatchMessage = "911 Call",
                 name = plyData['firstname']..' '..plyData['lastname'],
                 number =  plyData['phone_number'],
-                job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"},
+                job = {"police","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"},
                 information = msg
             })
         end
@@ -1189,13 +1204,14 @@ end)
 RegisterCommand('311', function(source, args, rawCommand)
     local msg = rawCommand:sub(5)
     if string.len(msg) > 0 then
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = ESX.GetPlayerData()
         local locationInfo = GetStreetAndZone()
         local gender = IsPedMale(playerPed)
         local currentPos = GetEntityCoords(playerPed)
+		print(ESX.DumpTable(ESX.GetPlayerData()))
 
         TriggerEvent('dp:playEmote', "phone")
-		local rfl = exports['erp_progressbar']:taskBar(math.random(2500, 4000), "Dialing 311")
+		local rfl = 100
         TriggerEvent('dp:cancelEmote')
         if rfl == 100 then
             TriggerServerEvent('dispatch:svNotify', {
@@ -1205,9 +1221,9 @@ RegisterCommand('311', function(source, args, rawCommand)
                 priority = 2,
                 origin = { x = currentPos.x, y = currentPos.y, z = currentPos.z },
                 dispatchMessage = "311 Call",
-                name = plyData['firstname']..' '..plyData['lastname'],
+                name = plyData['firstName']..' '..plyData['lastName'],
                 number =  plyData['phone_number'],
-                job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"},
+                job = {"police","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"},
                 information = msg
             })
         end
@@ -1238,7 +1254,7 @@ function DrugSale()
             z = currentPos.z
         },
         dispatchMessage = "Suspicious Hand-off",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 5 and not isInVehicle then
@@ -1265,7 +1281,7 @@ function DrugSale()
                     z = newPos.z
                     },
                     dispatchMessage = "Car Fleeing 10-99",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:drugsale', newPos)
             end
@@ -1301,7 +1317,7 @@ function CarCrash()
             z = currentPos.z
         },
         dispatchMessage = "Vehicle Crash",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
     })
 end
 
@@ -1335,7 +1351,7 @@ function AlertCheckLockpick(object)
             z = currentPos.z
         },
         dispatchMessage = "Vehicle Theft",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 end
 
@@ -1361,7 +1377,7 @@ function AlertpersonRobbed()
             z = currentPos.z
         },
         dispatchMessage = "Store Robbery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 3 and not isInVehicle then
@@ -1389,7 +1405,7 @@ function AlertpersonRobbed()
                     z = newPos.z
                     },
                     dispatchMessage = "Vehicle fleeing 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:houserobbery', newPos)
             end
@@ -1425,7 +1441,7 @@ function AlertCheckRobbery2()
             z = currentPos.z
         },
         dispatchMessage = "Breaking and entering",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 3 and not isInVehicle then
@@ -1453,7 +1469,7 @@ function AlertCheckRobbery2()
                     z = newPos.z
                     },
                     dispatchMessage = "Car fleeing 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:houserobbery', newPos)
             end
@@ -1484,7 +1500,7 @@ function AlertBankTruck()
             z = currentPos.z
         },
         dispatchMessage = "Bank Truck",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1512,7 +1528,7 @@ function AlertBankTruck()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading Bank Truck",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:banktruck', newPos)
             end
@@ -1543,7 +1559,7 @@ function AlertArt()
             z = currentPos.z
         },
         dispatchMessage = "Art Gallery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1571,7 +1587,7 @@ function AlertArt()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading Bank Truck",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:art', newPos)
             end
@@ -1602,7 +1618,7 @@ function AlertG6()
             z = currentPos.z
         },
         dispatchMessage = "Gruppe Sechs Alarm",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 end
 
@@ -1628,7 +1644,7 @@ function AlertJewelRob()
             z = currentPos.z
         },
         dispatchMessage = "Vangelico Robbery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1656,7 +1672,7 @@ function AlertJewelRob()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:jewel', newPos)
             end
@@ -1686,7 +1702,7 @@ function AlertJailBreak()
             z = currentPos.z
         },
         dispatchMessage = "Jail Break in Progress",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1715,7 +1731,7 @@ function AlertJailBreak()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-98",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
 
                 TriggerServerEvent('erp-dispatch:blip:jailbreak', newPos)
@@ -1746,7 +1762,7 @@ function AlertPaletoRobbery()
             z = currentPos.z
         },
         dispatchMessage = "Paleto Robbery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1774,7 +1790,7 @@ function AlertPaletoRobbery()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:bankwobbewy', newPos)
             end
@@ -1811,7 +1827,7 @@ function AlertCarBoost(boosted)
             z = currentPos.z
         },
         dispatchMessage = "Car Boosting",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     Citizen.CreateThread(function()
@@ -1848,7 +1864,7 @@ function AlertFleecaRobbery()
             z = currentPos.z
         },
         dispatchMessage = "Fleeca Robbery",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1876,7 +1892,7 @@ function AlertFleecaRobbery()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:bankwobbewy', newPos)
             end
@@ -1931,7 +1947,7 @@ function AlertPacificRobbery()
             z = currentPos.z
         },
         dispatchMessage = "Pacific Standard Heist",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -1958,7 +1974,7 @@ function AlertPacificRobbery()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:bankwobbewy', newPos)
             end
@@ -1988,7 +2004,7 @@ function AlertPowerplant()
             z = currentPos.z
         },
         dispatchMessage = "Powerplant Hit",
-        job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+        job = {"police","bcso","pa","sast","sapr","sasp","doc"}
     })
 
     if math.random(10) > 2 and not isInVehicle then
@@ -2015,7 +2031,7 @@ function AlertPowerplant()
                         z = newPos.z
                     },
                     dispatchMessage = "Evading 10-90",
-                    job = {"lspd","bcso","pa","sast","sapr","sasp","doc"}
+                    job = {"police","bcso","pa","sast","sapr","sasp","doc"}
                 })
                 TriggerServerEvent('erp-dispatch:bankwobbewy', newPos)
             end
@@ -2064,7 +2080,7 @@ AddEventHandler('police:tenThirteenA', function()
     if PlayerData.job.isPolice then	
        
         local pos = GetEntityCoords(PlayerPedId(),  true)
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = ESX.GetPlayerData()
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-13A",
@@ -2079,7 +2095,7 @@ AddEventHandler('police:tenThirteenA', function()
 				y = pos.y,
 				z = pos.z
             },
-            job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+            job = {"police","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
         })
         
         TriggerServerEvent('erp-dispatch:policealertA', pos)
@@ -2130,7 +2146,7 @@ AddEventHandler('police:tenThirteenB', function()
     if PlayerData.job.isPolice then
         local pos = GetEntityCoords(PlayerPedId(),  true)
         
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = ESX.GetPlayerData()
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-13B",
@@ -2145,7 +2161,7 @@ AddEventHandler('police:tenThirteenB', function()
 				y = pos.y,
 				z = pos.z
             },
-            job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+            job = {"police","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
         })
 
         CreateThread(function()
@@ -2596,6 +2612,12 @@ end)
 
 RegisterNetEvent('dispatch:clNotify')
 AddEventHandler('dispatch:clNotify', function(sNotificationData, sNotificationId, sender)
+  print(ESX.DumpTable(sNotificationData))
+  if ESX.GetPlayerData().job.name == 'police' then
+  local ispolice = true
+  else
+  local ispolice = false
+  end
   if sNotificationData ~= nil then
     if sender == GetPlayerServerId(PlayerId()) and sNotificationData['dispatchCode'] == '911' then
         SendNUIMessage({
@@ -2627,7 +2649,7 @@ AddEventHandler('dispatch:clNotify', function(sNotificationData, sNotificationId
     if PlayerData.job.duty == 0 then return end;
     local shouldAlert = false
     for i=1, #sNotificationData['job'] do
-        if sNotificationData['job'][i] == PlayerData.job.name then
+        if sNotificationData['job'][i] == ESX.GetPlayerData().job.name then
             shouldAlert = true
             break
         end
@@ -2646,7 +2668,7 @@ AddEventHandler('dispatch:clNotify', function(sNotificationData, sNotificationId
                 callID = sNotificationId,
                 data = sNotificationData,
                 timer = 5000,
-                isPolice = PlayerData.job.isPolice
+                isPolice = ispolice
             })
         end
       end
@@ -2727,10 +2749,10 @@ AddEventHandler('ems:tenThirteenA', function()
     if PlayerData.job.name == 'ambulance' then	
        
         local pos = GetEntityCoords(PlayerPedId(),  true)
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = ESX.GetPlayerData()
 
 
-        local job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+        local job = {"police","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-14A",
@@ -2794,7 +2816,7 @@ AddEventHandler('ems:tenThirteenB', function()
     if PlayerData.job.name == 'ambulance' then	
         local pos = GetEntityCoords(PlayerPedId(),  true)
         
-        local plyData = exports['echorp']:GetPlayerData()
+        local plyData = ESX.GetPlayerData()
 
 		TriggerServerEvent("dispatch:svNotify", {
 			dispatchCode = "10-14B",
@@ -2809,7 +2831,7 @@ AddEventHandler('ems:tenThirteenB', function()
 				y = pos.y,
 				z = pos.z
             },
-            job = {"lspd","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
+            job = {"police","bcso","pa","sast","sapr","sasp","doc","ambulance", "cmmc"}
         })
 
         CreateThread(function()

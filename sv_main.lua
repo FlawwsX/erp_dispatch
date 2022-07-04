@@ -1,5 +1,9 @@
 local calls = {}
 
+ESX = nil
+
+TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+
 function GetDispatchCalls() return calls end
 exports('GetDispatchCalls', GetDispatchCalls) -- exports['erp_dispatch']:GetDispatchCalls()
 
@@ -23,19 +27,19 @@ AddEventHandler("dispatch:addUnit", function(callid, player, cb)
 
         if #calls[callid]['units'] > 0 then
             for i=1, #calls[callid]['units'] do
-                if calls[callid]['units'][i]['cid'] == player.cid then
+                if calls[callid]['units'][i]['cid'] == player.identifier then
                     cb(#calls[callid]['units'])
                     return
                 end
             end
         end
-
-        if player.job.isPolice then
-            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'Police', callsign = exports['erp_mdt']:GetCallsign(player.cid) })
+	local callsign = exports['mdt']:GetCallsign(player.identifier)
+        if player.job.name == 'police' then
+            table.insert(calls[callid]['units'], { cid = player.identifier, fullname = player.name, job = 'Police', callsign = callsign[1].callsign	})
         elseif player.job.name == 'ambulance' then
-            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'EMS', callsign = exports['erp_mdt']:GetCallsign(player.cid) })
+            table.insert(calls[callid]['units'], { cid = player.identifier, fullname = player.name, job = 'EMS', callsign = callsign[1].callsign })
         elseif player.job.name == 'cmmc' then
-            table.insert(calls[callid]['units'], { cid = player.cid, fullname = player.fullname, job = 'EMS', callsign = exports['erp_mdt']:GetCallsign(player.cid) })
+            table.insert(calls[callid]['units'], { cid = player.identifier, fullname = player.name, job = 'EMS', callsign = callsign[1].callsign })
         end
 
         cb(#calls[callid]['units'])
@@ -46,7 +50,7 @@ AddEventHandler("dispatch:removeUnit", function(callid, player, cb)
     if calls[callid] then
         if #calls[callid]['units'] > 0 then
             for i=1, #calls[callid]['units'] do
-                if calls[callid]['units'][i]['cid'] == player.cid then
+                if calls[callid]['units'][i]['cid'] == player.identifier then
                     table.remove(calls[callid]['units'], i)
                 end
             end
@@ -58,7 +62,7 @@ end)
 AddEventHandler("dispatch:sendCallResponse", function(player, callid, message, time, cb)
     if calls[callid] then
         table.insert(calls[callid]['responses'], {
-            name = player.fullname,
+            name = player.name,
             message = message,
             time = time
         })
@@ -74,8 +78,8 @@ end)
 
 RegisterCommand('togglealerts', function(source, args, user)
 	local source = source
-	local job = exports['echorp']:GetOnePlayerInfo(source, 'job')
-	if job.isPolice or job.name == 'ambulance' or job.name == 'pa' or job.name == 'cmmc' then
+	local job = ESX.GetPlayerFromId(source).job
+	if job.name == 'police' or job.name == 'ambulance' or job.name == 'pa' or job.name == 'cmmc' then
 		TriggerClientEvent('erp-dispatch:manageNotifs', source, args[1])
 	end
 end)
